@@ -7,14 +7,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $libelle = trim($_POST['libelle'] ?? '');
 
     if (!empty($libelle)) {
-        $stmt = $pdo->prepare("INSERT INTO service (libelle) VALUES (:libelle)");
+        $stmt = $pdo->prepare("INSERT INTO disponibilite (libelle) VALUES (:libelle)");
         if ($stmt->execute(['libelle' => $libelle])) {
-            $message = '<div class="alert alert-success">Service ajouté avec succès !</div>';
+            $message = '<div class="alert alert-success">Disponibilité ajoutée avec succès !</div>';
         } else {
-            $message = '<div class="alert alert-danger">Erreur lors de l\'ajout du service.</div>';
+            $message = '<div class="alert alert-danger">Erreur lors de l\'ajout de la disponibilité.</div>';
         }
     } else {
-        $message = '<div class="alert alert-warning">Veuillez remplir le champ service.</div>';
+        $message = '<div class="alert alert-warning">Veuillez remplir le champ disponibilité.</div>';
     }
 }
 ?>
@@ -84,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="x_content">
                                     <?php if ($message) echo $message; ?>
                                     <form class="" action="" method="post" novalidate>
-                                        <span class="section">Ajouter Service</span>
+                                        <span class="section">Ajouter Disponibilité</span>
                                         <div class="field item form-group">
                                             <label class="col-form-label col-md-3 col-sm-3  label-align">Libellé<span class="required">*</span></label>
                                             <div class="col-md-6 col-sm-6">

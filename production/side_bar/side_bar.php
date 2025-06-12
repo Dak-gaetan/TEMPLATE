@@ -28,18 +28,24 @@
                   <li><a><i class="fa fa-home"></i> Home <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
                       
-                      <li><a href="index3.html">Dashboard3</a></li>
+                      <li><a href="index.php">Dashboard3</a></li>
                     </ul>
                   </li>
                   <li><a><i class="fa fa-edit"></i> Poste <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
                       <li><a href="poste_form.php">Ajouter</a></li>
-                      <li><a href="tables.html">Liste</a></li>
+                      <li><a href="forme_poste.php">Liste</a></li>
                     </ul>
                   </li>
                   <li><a><i class="fa fa-edit"></i> Service <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
                       <li><a href="service_form.php">Ajouter</a></li>
+                      <li><a href="form_poste.php">Liste</a></li>
+                    </ul>
+                  </li>
+                  <li><a><i class="fa fa-edit"></i> Disponibilite <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="form_disponibilite.php">Ajouter</a></li>
                       <li><a href="form_poste.php">Liste</a></li>
                     </ul>
                   </li>
