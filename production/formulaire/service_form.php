@@ -1,5 +1,5 @@
 <?php
-require_once '../config/config_db.php';
+require_once '../../config/config_db.php';
 
 $message = '';
 
@@ -7,14 +7,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $libelle = trim($_POST['libelle'] ?? '');
 
     if (!empty($libelle)) {
-        $stmt = $pdo->prepare("INSERT INTO poste (libelle) VALUES (:libelle)");
+        $stmt = $pdo->prepare("INSERT INTO service (libelle) VALUES (:libelle)");
         if ($stmt->execute(['libelle' => $libelle])) {
-            $message = '<div class="alert alert-success">Poste ajouté avec succès !</div>';
+            $message = '<div class="alert alert-success">Service ajouté avec succès !</div>';
         } else {
-            $message = '<div class="alert alert-danger">Erreur lors de l\'ajout du poste.</div>';
+            $message = '<div class="alert alert-danger">Erreur lors de l\'ajout du service.</div>';
         }
     } else {
-        $message = '<div class="alert alert-warning">Veuillez remplir le champ libellé.</div>';
+        $message = '<div class="alert alert-warning">Veuillez remplir le champ service.</div>';
     }
 }
 ?>
@@ -32,27 +32,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Gentelella Alela! | </title>
 
     <!-- Bootstrap -->
-    <link href="../vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
-    <link href="../vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <link href="../../vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet">
     <!-- NProgress -->
-    <link href="../vendors/nprogress/nprogress.css" rel="stylesheet">
+    <link href="../../vendors/nprogress/nprogress.css" rel="stylesheet">
 
     <!-- Custom Theme Style -->
-    <link href="../build/css/custom.min.css" rel="stylesheet">
+    <link href="../../build/css/custom.min.css" rel="stylesheet">
 </head>
 
 <body class="nav-md">
     <div class="container body">
         <div class="main_container">
       <!-- SIDE BAR -->
-        <?php include("side_bar/side_bar.php"); ?>
+        <?php include("../side_bar/side_bar.php"); ?>
       <!-- END SIDE BAR -->
 
             <!-- top navigation -->
-            <?php
-            include("navigation.php");
-            ?>
+            <?php include("../navigation.php"); ?>
             <!-- /top navigation -->
 
             <!-- page content -->
@@ -60,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="">
                     <div class="page-title">
                         <div class="title_left">
-                            <h3>Formulaire Poste</h3>
+                            <h3>Formulaire Service</h3>
                         </div>
 
                        
@@ -71,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="col-md-12 col-sm-12">
                             <div class="x_panel">
                                 <div class="x_title">
-                                    <h2>POSTE</h2>
+                                    <h2>SERVICE</h2>
                                     <ul class="nav navbar-right panel_toolbox">
                                         <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                                         </li>
@@ -84,14 +82,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="x_content">
                                     <?php if ($message) echo $message; ?>
                                     <form class="" action="" method="post" novalidate>
-                                        <span class="section">Ajouter un Poste</span>
+                                        <span class="section">Ajouter Service</span>
                                         <div class="field item form-group">
                                             <label class="col-form-label col-md-3 col-sm-3  label-align">Libellé<span class="required">*</span></label>
                                             <div class="col-md-6 col-sm-6">
                                                 <input class="form-control" name="libelle" required="required" type="text" />
                                             </div>
                                         </div>
-                                       
                                         <div class="ln_solid">
                                             <div class="form-group">
                                                 <div class="col-md-6 offset-md-3">
@@ -122,8 +119,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script src="../vendors/validator/multifield.js"></script>
-    <script src="../vendors/validator/validator.js"></script>
+    <script src="../../vendors/validator/multifield.js"></script>
+    <script src="../../vendors/validator/validator.js"></script>
     
     <!-- Javascript functions	-->
 	
@@ -155,21 +152,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </script>
 
     <!-- jQuery -->
-    <script src="../vendors/jquery/dist/jquery.min.js"></script>
+    <script src="../../vendors/jquery/dist/jquery.min.js"></script>
     <!-- Bootstrap -->
-    <script src="../vendors/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../vendors/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <!-- FastClick -->
-    <script src="../vendors/fastclick/lib/fastclick.js"></script>
+    <script src="../../vendors/fastclick/lib/fastclick.js"></script>
     <!-- NProgress -->
-    <script src="../vendors/nprogress/nprogress.js"></script>
+    <script src="../../vendors/nprogress/nprogress.js"></script>
     <!-- validator -->
     <!-- <script src="../vendors/validator/validator.js"></script> -->
 
     <!-- Custom Theme Scripts -->
-    <script src="../build/js/custom.min.js"></script>
+    <script src="../../build/js/custom.min.js"></script>
 
 </body>
 
 </html>
-
-

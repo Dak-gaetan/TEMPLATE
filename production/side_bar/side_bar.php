@@ -1,7 +1,7 @@
-        <div class="col-md-3 left_col">
+<div class="col-md-3 left_col">
           <div class="left_col scroll-view">
             <div class="navbar nav_title" style="border: 0;">
-              <a href="index.html" class="site_title"><i class="fa fa-paw"></i> <span>PRESENCE</span></a>
+              <a href="index.php" class="site_title"><i class="fa fa-paw"></i> <span>PRESENCE</span></a>
             </div>
 
             <div class="clearfix"></div>
@@ -9,7 +9,7 @@
             <!-- menu profile quick info -->
             <div class="profile clearfix">
               <div class="profile_pic">
-                <img src="images/img.jpg" alt="..." class="img-circle profile_img">
+                <img src="/TEMPLATE/production/images/img.jpg" alt="..." class="img-circle profile_img">
               </div>
               <div class="profile_info">
                 <span>Welcome,</span>
@@ -28,26 +28,27 @@
                   <li><a><i class="fa fa-home"></i> Home <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
                       
-                      <li><a href="index.php">Dashboard3</a></li>
+                      <li><a href="/TEMPLATE/production/index.php">Dashboard3</a></li>
                     </ul>
                   </li>
                   <li><a><i class="fa fa-edit"></i> Poste <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
-                      <li><a href="poste_form.php">Ajouter</a></li>
-                      <li><a href="poste_table.php">Liste</a></li>
+                      <li><a href="/TEMPLATE/production/formulaire/poste_form.php">Ajouter</a></li>
+                      <li><a href="/TEMPLATE/production/table/poste_table.php">Liste</a></li>
                     </ul>
                   </li>
                   <li><a><i class="fa fa-edit"></i> Service <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
-                      <li><a href="service_form.php">Ajouter</a></li>
-                      <li><a href="service_table.php">Liste</a></li>
+                      <li><a href="/TEMPLATE/production/formulaire/service_form.php">Ajouter</a></li>
+                      <li><a href="/TEMPLATE/production/table/service_table.php">Liste</a></li>
                     </ul>
                   </li>
                   <li><a><i class="fa fa-edit"></i> Disponibilite <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
-                      <li><a href="form_disponibilite.php">Ajouter</a></li>
-                      <li><a href="form_poste.php">Liste</a></li>
+                      <li><a href="/TEMPLATE/production/formulaire/form_disponibilite.php">Ajouter</a></li>
+                      <li><a href="/TEMPLATE/production/table/disponibilite_table.php">Liste</a></li>
                     </ul>
+                  
                   </li>
                   <li><a><i class="fa fa-edit"></i> Forms <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
