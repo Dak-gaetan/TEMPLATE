@@ -126,7 +126,7 @@
                 <div class="">
                     <div class="page-title">
                         <div class="title_left">
-                            <h3>Formulaire Poste</h3>
+                            <h3>Formulaire Service</h3>
                         </div>
 
                        
@@ -137,7 +137,7 @@
                         <div class="col-md-12 col-sm-12">
                             <div class="x_panel">
                                 <div class="x_title">
-                                    <h2>POSTE</h2>
+                                    <h2>SERVICE</h2>
                                     <ul class="nav navbar-right panel_toolbox">
                                         <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                                         </li>
@@ -150,7 +150,7 @@
                                 <div class="x_content">
                                     <form class="" action="" method="post" novalidate>
                                         
-                                        <span class="section">Ajouter Poste</span>
+                                        <span class="section">Ajouter Service</span>
                                        
                                         <div class="field item form-group">
                                             <label class="col-form-label col-md-3 col-sm-3  label-align"><span class="required"></span></label>

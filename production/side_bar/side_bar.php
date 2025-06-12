@@ -34,13 +34,13 @@
                   <li><a><i class="fa fa-edit"></i> Poste <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
                       <li><a href="poste_form.php">Ajouter</a></li>
-                      <li><a href="form_advanced.html">Liste</a></li>
+                      <li><a href="tables.html">Liste</a></li>
                     </ul>
                   </li>
                   <li><a><i class="fa fa-edit"></i> Service <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
-                      <li><a href="form.html">Ajouter</a></li>
-                      <li><a href="form_advanced.html">Liste</a></li>
+                      <li><a href="service_form.php">Ajouter</a></li>
+                      <li><a href="form_poste.php">Liste</a></li>
                     </ul>
                   </li>
                   <li><a><i class="fa fa-edit"></i> Forms <span class="fa fa-chevron-down"></span></a>
