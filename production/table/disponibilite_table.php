@@ -169,12 +169,13 @@ $dispos = $pdo->query("SELECT id_disponibilite, libelle FROM disponibilite ORDER
                         </tr>
                       </thead>
                       <tbody>
+<?php $num = 1; ?>
 <?php foreach ($dispos as $dispo): ?>
     <tr>
-        <th scope="row"><?= htmlspecialchars($dispo['id_disponibilite']) ?></th>
+        <th scope="row"><?= $num++ ?></th>
         <td><?= htmlspecialchars($dispo['libelle']) ?></td>
         <td>
-            <a href='#' class='btn btn-edit'><i class='fa fa-edit'></i></a>
+            <a href='/TEMPLATE/production/modif/modif_dispo_liste.php?id=<?= $dispo['id_disponibilite'] ?>' class='btn btn-edit'><i class='fa fa-edit'></i></a>
         </td>
         <td>
             <a href='disponibilite_table.php?delete=<?= $dispo['id_disponibilite'] ?>' class='btn btn-delete' onclick='return confirm("Êtes-vous sûr de vouloir supprimer cette disponibilité ?")'><i class='fa fa-trash'></i></a>

@@ -169,12 +169,13 @@ $services = $pdo->query("SELECT id_service, libelle FROM service ORDER BY id_ser
                         </tr>
                       </thead>
                       <tbody>
+<?php $num = 1; ?>
 <?php foreach ($services as $service): ?>
     <tr>
-        <th scope="row"><?= htmlspecialchars($service['id_service']) ?></th>
+        <th scope="row"><?= $num++ ?></th>
         <td><?= htmlspecialchars($service['libelle']) ?></td>
         <td>
-            <a href='#' class='btn btn-edit'><i class='fa fa-edit'></i></a>
+            <a href='/TEMPLATE/production/modif/modif_service_liste.php?id=<?= $service['id_service'] ?>' class='btn btn-edit'><i class='fa fa-edit'></i></a>
         </td>
         <td>
             <a href='service_table.php?delete=<?= $service['id_service'] ?>' class='btn btn-delete' onclick='return confirm("Êtes-vous sûr de vouloir supprimer ce service ?")'><i class='fa fa-trash'></i></a>

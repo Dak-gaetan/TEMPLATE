@@ -169,12 +169,13 @@ $postes = $pdo->query("SELECT id_poste, libelle FROM poste ORDER BY id_poste DES
                         </tr>
                       </thead>
                       <tbody>
+<?php $num = 1; ?>
 <?php foreach ($postes as $poste): ?>
     <tr>
-        <th scope="row"><?= htmlspecialchars($poste['id_poste']) ?></th>
+        <th scope="row"><?= $num++ ?></th>
         <td><?= htmlspecialchars($poste['libelle']) ?></td>
         <td>
-            <a href='#' class='btn btn-edit'><i class='fa fa-edit'></i></a>
+            <a href='/TEMPLATE/production/modif/modif_poste_liste.php?id=<?= $poste['id_poste'] ?>' class='btn btn-edit'><i class='fa fa-edit'></i></a>
         </td>
         <td>
             <a href='poste_table.php?delete=<?= $poste['id_poste'] ?>' class='btn btn-delete' onclick='return confirm("Êtes-vous sûr de vouloir supprimer ce poste ?")'><i class='fa fa-trash'></i></a>
