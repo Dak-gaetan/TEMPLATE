@@ -4,15 +4,10 @@ require_once '../../config/config_db.php';
 $message = '';
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-// Récupérer les infos de la disponibilité à modifier
+// Récupérer les infos du niveau à modifier
 $stmt = $pdo->prepare("SELECT libelle FROM niveau WHERE id_niveau = :id_niveau");
 $stmt->execute(['id_niveau' => $id]);
-$dispo = $stmt->fetch();
-
-if (!$nivea) {
-    echo "<div class='alert alert-danger'>Niveau d'habilitation introuvable.</div>";
-    exit;
-}
+$niveau = $stmt->fetch();
 
 // Traitement du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -20,9 +15,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!empty($libelle)) {
         $update = $pdo->prepare("UPDATE niveau SET libelle = :libelle WHERE id_niveau = :id_niveau");
-        if ($update->execute(['libelle' => $libelle, 'id_nieau' => $id])) {
-            $message = "<div class='alert alert-success'>Niveau d habilitation modifié   avec succès !</div>";
-            $nivea['libelle'] = $libelle;
+        if ($update->execute(['libelle' => $libelle, 'id_niveau' => $id])) {
+            $message = "<div class='alert alert-success'>Niveau d'habilitation modifié avec succès !</div>";
+            $niveau['libelle'] = $libelle;
         } else {
             $message = "<div class='alert alert-danger'>Erreur lors de la modification.</div>";
         }
@@ -30,12 +25,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = "<div class='alert alert-warning'>Veuillez remplir le champ libellé.</div>";
     }
 }
+
+// Supprime ou commente cette ligne si elle existe :
+//$niveaux = $pdo->query("SELECT id_niveau, libelle FROM niveau")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Modifier une disponibilité</title>
+    <title>Modifier un niveau</title>
     <!-- Gentelella & Bootstrap CSS -->
     <link href="../../vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="../../vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet">
@@ -64,8 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php if ($message) echo $message; ?>
             <form method="post">
               <div class="form-group">
-                <label for="libelle">Libellé Niveau d habilitation</label>
-                <input type="text" class="form-control" id="libelle" name="libelle" value="<?= htmlspecialchars($nivea['libelle']) ?>" required>
+                <label for="libelle">Libellé Niveau d'habilitation</label>
+                <input type="text" class="form-control" id="libelle" name="libelle" value="<?= htmlspecialchars($niveau['libelle'] ?? '') ?>" required>
               </div>
               <button type="submit" class="btn btn-primary">Enregistrer</button>
               <a href="/TEMPLATE/production/table/niveau_table.php" class="btn btn-secondary">Retour à la liste</a>

@@ -8,7 +8,6 @@ $dispos = $pdo->query("SELECT id_disponibilite, libelle FROM disponibilite")->fe
 $message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Récupérer et sécuriser les données du formulaire
     $nom = trim($_POST['nom'] ?? '');
     $prenom = trim($_POST['prenom'] ?? '');
     $email = trim($_POST['email'] ?? '');
@@ -21,9 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
 
-    $tel = trim($_POST['telephone'] ?? ''); // récupère le champ du formulaire "telephone" dans la variable $tel
+    $tel = trim($_POST['telephone'] ?? '');
 
-    // Vérification des champs obligatoires et des correspondances
     if (
         $nom && $prenom && $email && $confirm_email && $tel &&
         $id_poste && $id_service && $id_disponibilite &&
@@ -34,17 +32,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($password !== $confirm_password) {
             $message = "<div class='alert alert-warning'>Les mots de passe ne correspondent pas.</div>";
         } else {
-            // Vérifier si l'email existe déjà
-            $check = $pdo->prepare("SELECT COUNT(*) FROM personnel WHERE email = :email");
+            // Vérifier si l'email existe déjà dans compte
+            $check = $pdo->prepare("SELECT COUNT(*) FROM compte WHERE email = :email");
             $check->execute(['email' => $email]);
             if ($check->fetchColumn() > 0) {
                 $message = "<div class='alert alert-danger'>Cet email existe déjà dans la base.</div>";
             } else {
-                // Hash du mot de passe
                 $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
-                // Préparation de la requête d'insertion
-                $stmt = $pdo->prepare("INSERT INTO personnel 
+                // Insertion dans la table compte (sans id_niveau)
+                $stmt = $pdo->prepare("INSERT INTO compte 
                     (nom, prenom, email, tel, id_poste, id_service, id_disponibilite, nom_utilisateur, mot_de_passe) 
                     VALUES 
                     (:nom, :prenom, :email, :tel, :id_poste, :id_service, :id_disponibilite, :nom_utilisateur, :mot_de_passe)");
@@ -62,11 +59,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ]);
 
                 if ($ok) {
-                    $message = "<div class='alert alert-success'>Employé ajouté avec succès !</div>";
-                    header("Location: /TEMPLATE/production/table/employe_table.php");
+                    $message = "<div class='alert alert-success'>Compte ajouté avec succès !</div>";
+                    header("Location: /TEMPLATE/production/table/compte_table.php");
                     exit;
                 } else {
-                    $message = "<div class='alert alert-danger'>Erreur lors de l'ajout de l'employé.</div>";
+                    $message = "<div class='alert alert-danger'>Erreur lors de l'ajout du compte.</div>";
                 }
             }
         }
@@ -75,7 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -275,10 +271,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="../../vendors/validator/multifield.js"></script>
     <script src="../../vendors/validator/validator.js"></script>
-    
-    <!-- Javascript functions	-->
-	
-
     <script>
         // initialize a validator instance from the "FormValidator" constructor.
         // A "<form>" element is optionally passed as an argument, but is not a must
