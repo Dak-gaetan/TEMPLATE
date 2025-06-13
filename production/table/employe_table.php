@@ -81,7 +81,7 @@ $employes = $pdo->query($sql)->fetchAll();
                             <th>Poste</th>
                             <th>Service</th>
                             <th>Disponibilité</th>
-                            <th>Niveau d'habilitation</th>
+                          
                             <th>Actions</th>
                           </tr>
                         </thead>
@@ -97,7 +97,7 @@ $employes = $pdo->query($sql)->fetchAll();
                             <td><?= htmlspecialchars($emp['poste']) ?></td>
                             <td><?= htmlspecialchars($emp['service']) ?></td>
                             <td><?= htmlspecialchars($emp['disponibilite']) ?></td>
-                            <td><?= htmlspecialchars($emp['niveau_habilitation']) ?></td>
+                           
                             <td>
                               <a href='/TEMPLATE/production/modif/modif_employe_liste.php?id=<?= $emp['id_personnel'] ?>' class='btn btn-edit btn-sm'><i class='fa fa-edit'></i></a>
                               <a href='employe_table.php?delete=<?= $emp['id_personnel'] ?>' class='btn btn-delete btn-sm' onclick='return confirm("Supprimer cet employé ?")'><i class='fa fa-trash'></i></a>

@@ -1,83 +1,3 @@
-<?php
-require_once '../../config/config_db.php';
-// Récupération des listes pour les select
-$postes = $pdo->query("SELECT id_poste, libelle FROM poste")->fetchAll();
-$services = $pdo->query("SELECT id_service, libelle FROM service")->fetchAll();
-$dispos = $pdo->query("SELECT id_disponibilite, libelle FROM disponibilite")->fetchAll();
-$niveaux = $pdo->query("SELECT id_niveau, libelle FROM niveau")->fetchAll(); // Ajout de la récupération des niveaux
-
-$message = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Récupérer et sécuriser les données du formulaire
-    $nom = trim($_POST['nom'] ?? '');
-    $prenom = trim($_POST['prenom'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $confirm_email = trim($_POST['confirm_email'] ?? '');
-    $telephone = trim($_POST['telephone'] ?? '');
-    $id_poste = (int)($_POST['id_poste'] ?? 0);
-    $id_service = (int)($_POST['id_service'] ?? 0);
-    $id_disponibilite = (int)($_POST['id_disponibilite'] ?? 0);
-    $id_niveau = (int)($_POST['id_niveau'] ?? 0); // Ajout récupération niveau
-    $username = trim($_POST['username'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $confirm_password = $_POST['confirm_password'] ?? '';
-
-    $tel = trim($_POST['telephone'] ?? '');
-
-    // Vérification des champs obligatoires et des correspondances
-    if (
-        $nom && $prenom && $email && $confirm_email && $tel &&
-        $id_poste && $id_service && $id_disponibilite && $id_niveau &&
-        $username && $password && $confirm_password
-    ) {
-        if ($email !== $confirm_email) {
-            $message = "<div class='alert alert-warning'>Les emails ne correspondent pas.</div>";
-        } elseif ($password !== $confirm_password) {
-            $message = "<div class='alert alert-warning'>Les mots de passe ne correspondent pas.</div>";
-        } else {
-            // Vérifier si l'email existe déjà
-            $check = $pdo->prepare("SELECT COUNT(*) FROM personnel WHERE email = :email");
-            $check->execute(['email' => $email]);
-            if ($check->fetchColumn() > 0) {
-                $message = "<div class='alert alert-danger'>Cet email existe déjà dans la base.</div>";
-            } else {
-                // Hash du mot de passe
-                $password_hash = password_hash($password, PASSWORD_DEFAULT);
-
-                // Préparation de la requête d'insertion avec id_niveau
-                $stmt = $pdo->prepare("INSERT INTO personnel 
-                    (nom, prenom, email, tel, id_poste, id_service, id_disponibilite, id_niveau, nom_utilisateur, mot_de_passe) 
-                    VALUES 
-                    (:nom, :prenom, :email, :tel, :id_poste, :id_service, :id_disponibilite, :id_niveau, :nom_utilisateur, :mot_de_passe)");
-
-                $ok = $stmt->execute([
-                    'nom' => $nom,
-                    'prenom' => $prenom,
-                    'email' => $email,
-                    'tel' => $tel,
-                    'id_poste' => $id_poste,
-                    'id_service' => $id_service,
-                    'id_disponibilite' => $id_disponibilite,
-                    'id_niveau' => $id_niveau,
-                    'nom_utilisateur' => $username,
-                    'mot_de_passe' => $password_hash
-                ]);
-
-                if ($ok) {
-                    $message = "<div class='alert alert-success'>Employé ajouté avec succès !</div>";
-                    header("Location: /TEMPLATE/production/table/employe_table.php");
-                    exit;
-                } else {
-                    $message = "<div class='alert alert-danger'>Erreur lors de l'ajout de l'employé.</div>";
-                }
-            }
-        }
-    } else {
-        $message = "<div class='alert alert-warning'>Veuillez remplir tous les champs.</div>";
-    }
-}
-?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -104,16 +24,121 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body class="nav-md">
     <div class="container body">
         <div class="main_container">
-      <!-- SIDE BAR -->
-        <?php include("../side_bar/side_bar.php"); ?>
-      <!-- END SIDE BAR -->
+            <!-- SIDE BAR -->
+            <?php include("../side_bar/side_bar.php"); ?>
+            <!-- END SIDE BAR -->
 
             <!-- top navigation -->
-            <?php include("../navigation.php"); ?>
+            <?php
+            include("../navigation.php");
+            ?>
             <!-- /top navigation -->
 
             <!-- page content -->
-            
+            <div class="right_col" role="main">
+                <div class="">
+                    <div class="page-title">
+                        <div class="title_left">
+                            <h3>Formulaire Utilisateur</h3>
+                        </div>
+
+
+                    </div>
+                    <div class="clearfix"></div>
+
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12">
+                            <div class="x_panel">
+                                <div class="x_title">
+                                    <h2>UTILISATEUR</h2>
+                                    <ul class="nav navbar-right panel_toolbox">
+                                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                        </li>
+
+                                        <li><a class="close-link"><i class="fa fa-close"></i></a>
+                                        </li>
+                                    </ul>
+                                    <div class="clearfix"></div>
+                                </div>
+                                <div class="x_content">
+
+                                    <form class="" action="" method="post" novalidate>
+                                        <span class="section"></span>
+
+                                        <div class="field item form-group">
+                                            <label class="col-form-label col-md-3 col-sm-3 label-align">Utilisateur
+                                                <span class="required">*</span></label>
+                                            <div class="col-md-6 col-sm-6">
+                                                <select class="form-control" name="id_compte" required>
+                                                    <option value="">Sélectionner les utilisateurs</option>
+                                                    <?php foreach ($dispos as $dispo): ?>
+                                                        <option value="<?= $dispo['id_compte'] ?>">
+                                                            <?= htmlspecialchars($dispo['libelle']) ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="field item form-group">
+                                            <label class="col-form-label col-md-3 col-sm-3 label-align">Niveau d'habilitation
+                                                <span class="required">*</span></label>
+                                            <div class="col-md-6 col-sm-6">
+                                                <select class="form-control" name="id_compte" required>
+                                                    <option value="">Sélectionner le niveau d'habilitation</option>
+                                                    <?php foreach ($dispos as $dispo): ?>
+                                                        <option value="<?= $dispo['id_compte'] ?>">
+                                                            <?= htmlspecialchars($dispo['libelle']) ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="field item form-group">
+                                            <label class="col-form-label col-md-3 col-sm-3  label-align">Pseudo<span
+                                                    class="required">*</span></label>
+                                            <div class="col-md-6 col-sm-6">
+                                                <input class="form-control" name="libelle" required="required"
+                                                    type="text" />
+                                            </div>
+                                        </div>
+
+                                        <div class="field item form-group">
+                                            <label class="col-form-label col-md-3 col-sm-3  label-align">Password<span
+                                                    class="required">*</span></label>
+                                            <div class="col-md-6 col-sm-6">
+                                                <input class="form-control" type="password" id="password1"
+                                                    name="password"
+                                                    pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}"
+                                                    title="Minimum 8 Characters Including An Upper And Lower Case Letter, A Number And A Unique Character"
+                                                    required />
+
+                                                <span style="position: absolute;right:15px;top:7px;"
+                                                    onclick="hideshow()">
+                                                    <i id="slash" class="fa fa-eye-slash"></i>
+                                                    <i id="eye" class="fa fa-eye"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="ln_solid">
+                                            <div class="form-group">
+                                                <div class="col-md-6 offset-md-3">
+                                                    <button type='submit' class="btn btn-primary">Soumettre</button>
+                                                    <button type='reset' class="btn btn-success">Annuler</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
             <!-- /page content -->
 
             <!-- footer content -->
@@ -131,6 +156,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="../../vendors/validator/multifield.js"></script>
     <script src="../../vendors/validator/validator.js"></script>
+
+    <!-- Javascript functions	-->
+
+
     <script>
         // initialize a validator instance from the "FormValidator" constructor.
         // A "<form>" element is optionally passed as an argument, but is not a must
@@ -138,33 +167,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             "events": ['blur', 'input', 'change']
         }, document.forms[0]);
         // on form "submit" event
-        document.forms[0].onsubmit = function(e) {
-            var email = document.querySelector('[name="email"]').value;
-    var confirmEmail = document.querySelector('[name="confirm_email"]').value;
-    var pass = document.querySelector('[name="password"]').value;
-    var confirmPass = document.querySelector('[name="confirm_password"]').value;
-    var valid = true;
-    var msg = "";
-
-    if (email !== confirmEmail) {
-        msg += "Les emails ne correspondent pas.\n";
-        valid = false;
-    }
-    if (pass !== confirmPass) {
-        msg += "Les mots de passe ne correspondent pas.\n";
-        valid = false;
-    }
-    if (!valid) {
-        alert(msg);
-        e.preventDefault();
-    }
+        document.forms[0].onsubmit = function (e) {
+            var submit = true,
+                validatorResult = validator.checkAll(this);
+            console.log(validatorResult);
+            return !!validatorResult.valid;
         };
         // on form "reset" event
-        document.forms[0].onreset = function(e) {
+        document.forms[0].onreset = function (e) {
             validator.reset();
         };
         // stuff related ONLY for this demo page:
-        $('.toggleValidationTooltips').change(function() {
+        $('.toggleValidationTooltips').change(function () {
             validator.settings.alerts = !this.checked;
             if (this.checked)
                 $('form .alert').remove();

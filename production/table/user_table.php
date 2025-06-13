@@ -73,15 +73,12 @@ $employes = $pdo->query($sql)->fetchAll();
                         <thead>
                           <tr>
                             <th>#</th>
-                            <th>Nom</th>
-                            <th>Prénom</th>
-                            <th>Email</th>
-                            <th>Téléphone</th>
-                            <th>Nom d'utilisateur</th>
-                            <th>Poste</th>
-                            <th>Service</th>
-                            <th>Disponibilité</th>
-                            <th>Niveau d'habilitation</th>
+                          
+                            <th>Utilisateur</th>
+                              <th>Niveau d'habilitation</th>
+                            <th>Pseudo</th>
+                          
+                          
                             <th>Actions</th>
                           </tr>
                         </thead>
@@ -89,17 +86,14 @@ $employes = $pdo->query($sql)->fetchAll();
                           <?php $num = 1; foreach ($employes as $emp): ?>
                           <tr>
                             <td><?= $num++ ?></td>
-                            <td><?= htmlspecialchars($emp['nom']) ?></td>
-                            <td><?= htmlspecialchars($emp['prenom']) ?></td>
-                            <td><?= htmlspecialchars($emp['email']) ?></td>
-                            <td><?= htmlspecialchars($emp['tel']) ?></td>
+                           
                             <td><?= htmlspecialchars($emp['nom_utilisateur']) ?></td>
-                            <td><?= htmlspecialchars($emp['poste']) ?></td>
-                            <td><?= htmlspecialchars($emp['service']) ?></td>
-                            <td><?= htmlspecialchars($emp['disponibilite']) ?></td>
+                           
+                           
                             <td><?= htmlspecialchars($emp['niveau_habilitation']) ?></td>
+                             <td>#</td>
                             <td>
-                              <a href='/TEMPLATE/production/modif/modif_employe_liste.php?id=<?= $emp['id_personnel'] ?>' class='btn btn-edit btn-sm'><i class='fa fa-edit'></i></a>
+                              <a href='/TEMPLATE/production/modif/modif_user_liste.php?id=<?= $emp['id_personnel'] ?>' class='btn btn-edit btn-sm'><i class='fa fa-edit'></i></a>
                               <a href='employe_table.php?delete=<?= $emp['id_personnel'] ?>' class='btn btn-delete btn-sm' onclick='return confirm("Supprimer cet employé ?")'><i class='fa fa-trash'></i></a>
                             </td>
                           </tr>
