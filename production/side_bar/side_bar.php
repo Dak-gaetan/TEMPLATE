@@ -50,6 +50,11 @@
                     </ul>
                   
                   </li>
+                  <li><a><i class="fa fa-edit"></i> Employé <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="/TEMPLATE/production/formulaire/employe_form.php">Ajouter</a></li>
+                      <li><a href="/TEMPLATE/production/table/employe_table.php">Liste</a></li>
+                    </ul>
                   <li><a><i class="fa fa-edit"></i> Forms <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
                       <li><a href="form.html">General Form</a></li>
