@@ -61,6 +61,12 @@
                       <li><a href="/TEMPLATE/production/table/disponibilite_table.php">Liste</a></li>
                     </ul>
                   </li>
+                  <li><a><i class="fa fa-edit"></i> Badge <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="/TEMPLATE/production/formulaire/form_disponibilite.php">Scanner Badge</a></li>
+                      <li><a href="/TEMPLATE/production/formulaire/attribute_form.php">Attribuer Badge</a></li>
+                    </ul>
+                  </li>
                   <li><a><i class="fa fa-edit"></i> Niveau d'habilitation <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
                       <li><a href="/TEMPLATE/production/formulaire/niveau_form.php">Ajouter</a></li>
