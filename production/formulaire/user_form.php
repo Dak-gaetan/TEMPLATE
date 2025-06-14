@@ -62,6 +62,48 @@
                                 </div>
                                 <div class="x_content">
 
+                                    <?php
+                                    require_once '../../config/config_db.php';
+                                    $message = '';
+                                    $ok = false;
+
+                                    // Récupération des personnels et des niveaux d'habilitation
+                                    $personnes = $pdo->query("SELECT id_personnel, nom, prenom FROM personnel ORDER BY nom, prenom")->fetchAll();
+                                    $niveaux = $pdo->query("SELECT id_niveau, libelle FROM niveau ORDER BY libelle")->fetchAll();
+
+                                    // Traitement du formulaire
+                                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                                        $id_personnel = (int)($_POST['id_personnel'] ?? 0);
+                                        $pseudo = trim($_POST['pseudo'] ?? '');
+                                        $password = $_POST['password'] ?? '';
+                                        $confirm_password = $_POST['confirm_password'] ?? '';
+                                        $id_niveau = (int)($_POST['id_niveau'] ?? 0);
+
+                                        if ($id_personnel && $pseudo && $password && $confirm_password && $id_niveau) {
+                                            if ($password !== $confirm_password) {
+                                                $message = "<div class='alert alert-warning'>Les mots de passe ne correspondent pas.</div>";
+                                            } else {
+                                                // Vérifier si un compte existe déjà pour cette personne
+                                                $check = $pdo->prepare("SELECT COUNT(*) FROM compte WHERE id_personnel = :id_personnel");
+                                                $check->execute(['id_personnel' => $id_personnel]);
+                                                if ($check->fetchColumn() > 0) {
+                                                    $message = "<div class='alert alert-danger'>Un compte existe déjà pour cette personne.</div>";
+                                                } else {
+                                                    $password_hash = password_hash($password, PASSWORD_DEFAULT);
+                                                    $stmt = $pdo->prepare("INSERT INTO compte (id_personnel, pseudo, mot_de_passe, id_niveau) VALUES (:id_personnel, :pseudo, :mot_de_passe, :id_niveau)");
+                                                    $ok = $stmt->execute([
+                                                        'id_personnel' => $id_personnel,
+                                                        'pseudo' => $pseudo,
+                                                        'mot_de_passe' => $password_hash,
+                                                        'id_niveau' => $id_niveau
+                                                    ]);
+                                                }
+                                            }
+                                        } else {
+                                            $message = "<div class='alert alert-warning'>Veuillez remplir tous les champs.</div>";
+                                        }
+                                    }
+                                    ?>
                                     <form class="" action="" method="post" novalidate>
                                         <span class="section"></span>
 
@@ -69,11 +111,12 @@
                                             <label class="col-form-label col-md-3 col-sm-3 label-align">Utilisateur
                                                 <span class="required">*</span></label>
                                             <div class="col-md-6 col-sm-6">
-                                                <select class="form-control" name="id_compte" required>
+                                                <select class="form-control" name="id_personnel" required>
                                                     <option value="">Sélectionner les utilisateurs</option>
-                                                    <?php foreach ($dispos as $dispo): ?>
-                                                        <option value="<?= $dispo['id_compte'] ?>">
-                                                            <?= htmlspecialchars($dispo['libelle']) ?></option>
+                                                    <?php foreach ($personnes as $perso): ?>
+                                                        <option value="<?= $perso['id_personnel'] ?>">
+                                                            <?= htmlspecialchars($perso['nom'] . ' ' . $perso['prenom']) ?>
+                                                        </option>
                                                     <?php endforeach; ?>
                                                 </select>
                                             </div>
@@ -82,11 +125,11 @@
                                             <label class="col-form-label col-md-3 col-sm-3 label-align">Niveau d'habilitation
                                                 <span class="required">*</span></label>
                                             <div class="col-md-6 col-sm-6">
-                                                <select class="form-control" name="id_compte" required>
+                                                <select class="form-control" name="id_niveau" required>
                                                     <option value="">Sélectionner le niveau d'habilitation</option>
-                                                    <?php foreach ($dispos as $dispo): ?>
-                                                        <option value="<?= $dispo['id_compte'] ?>">
-                                                            <?= htmlspecialchars($dispo['libelle']) ?></option>
+                                                    <?php foreach ($niveaux as $niveau): ?>
+                                                        <option value="<?= $niveau['id_niveau'] ?>">
+                                                            <?= htmlspecialchars($niveau['libelle']) ?></option>
                                                     <?php endforeach; ?>
                                                 </select>
                                             </div>
@@ -96,26 +139,21 @@
                                             <label class="col-form-label col-md-3 col-sm-3  label-align">Pseudo<span
                                                     class="required">*</span></label>
                                             <div class="col-md-6 col-sm-6">
-                                                <input class="form-control" name="libelle" required="required"
+                                                <input class="form-control" name="pseudo" required="required"
                                                     type="text" />
                                             </div>
                                         </div>
 
-                                        <div class="field item form-group">
-                                            <label class="col-form-label col-md-3 col-sm-3  label-align">Password<span
-                                                    class="required">*</span></label>
-                                            <div class="col-md-6 col-sm-6">
-                                                <input class="form-control" type="password" id="password1"
-                                                    name="password"
-                                                    pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}"
-                                                    title="Minimum 8 Characters Including An Upper And Lower Case Letter, A Number And A Unique Character"
-                                                    required />
-
-                                                <span style="position: absolute;right:15px;top:7px;"
-                                                    onclick="hideshow()">
-                                                    <i id="slash" class="fa fa-eye-slash"></i>
-                                                    <i id="eye" class="fa fa-eye"></i>
-                                                </span>
+                                        <div class="form-group row">
+                                            <label for="password" class="col-md-3 col-form-label">Mot de passe <span class="required">*</span></label>
+                                            <div class="col-md-9">
+                                                <input type="password" class="form-control" id="password" name="password" required autocomplete="new-password">
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label for="confirm_password" class="col-md-3 col-form-label">Confirmer mot de passe <span class="required">*</span></label>
+                                            <div class="col-md-9">
+                                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required autocomplete="new-password">
                                             </div>
                                         </div>
 
@@ -130,6 +168,11 @@
 
 
                                     </form>
+                                    <?php if ($ok): ?>
+                                        <div class='alert alert-success'>Compte créé avec succès !</div>
+                                    <?php elseif ($message): ?>
+                                        <?= $message ?>
+                                    <?php endif; ?>
 
                                 </div>
                             </div>

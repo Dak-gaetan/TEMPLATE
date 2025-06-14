@@ -4,9 +4,9 @@ require_once '../../config/config_db.php';
 // Suppression employé si demandé
 if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     $id = (int)$_GET['delete'];
-    $stmt = $pdo->prepare("DELETE FROM personnel WHERE id_personnel = :id_personnel");
-    $stmt->execute(['id_personnel' => $id]);
-    header("Location: /TEMPLATE/production/table/employe_table.php");
+    $stmt = $pdo->prepare("DELETE FROM compte WHERE id_compte = :id_compte");
+    $stmt->execute(['id_compte' => $id]);
+    header("Location: /TEMPLATE/production/table/user_table.php");
     exit;
 }
 
@@ -21,6 +21,19 @@ $sql = "SELECT p.id_personnel, p.nom, p.prenom, p.email, p.tel, p.nom_utilisateu
         LEFT JOIN niveau ON p.id_niveau = niveau.id_niveau
         ORDER BY p.id_personnel DESC";
 $employes = $pdo->query($sql)->fetchAll();
+
+// Récupérer la liste des comptes avec nom et prénom concaténés
+$sql = "SELECT 
+            c.id_compte,           -- AJOUTE CETTE LIGNE
+            c.pseudo, 
+            n.libelle AS niveau_habilitation, 
+            p.nom, 
+            p.prenom
+        FROM compte c
+        LEFT JOIN personnel p ON c.id_personnel = p.id_personnel
+        LEFT JOIN niveau n ON c.id_niveau = n.id_niveau
+        ORDER BY p.nom, p.prenom";
+$comptes = $pdo->query($sql)->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -52,7 +65,7 @@ $employes = $pdo->query($sql)->fetchAll();
           <div class="">
             <div class="page-title">
               <div class="title_left">
-                <h3>Liste des employés</h3>
+                <h3>Liste des Utilisateur</h3>
               </div>
             </div>
             <div class="clearfix"></div>
@@ -60,7 +73,7 @@ $employes = $pdo->query($sql)->fetchAll();
               <div class="col-md-12 col-sm-12 ">
                 <div class="x_panel">
                   <div class="x_title">
-                    <h2>Employés <small>Tableau dynamique</small></h2>
+                    <h2>Utilisateur <small>Tableau dynamique</small></h2>
                     <ul class="nav navbar-right panel_toolbox">
                       <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
                       <li><a class="close-link"><i class="fa fa-close"></i></a></li>
@@ -83,18 +96,15 @@ $employes = $pdo->query($sql)->fetchAll();
                           </tr>
                         </thead>
                         <tbody>
-                          <?php $num = 1; foreach ($employes as $emp): ?>
+                          <?php $num = 1; foreach ($comptes as $compte): ?>
                           <tr>
                             <td><?= $num++ ?></td>
-                           
-                            <td><?= htmlspecialchars($emp['nom_utilisateur']) ?></td>
-                           
-                           
-                            <td><?= htmlspecialchars($emp['niveau_habilitation']) ?></td>
-                             <td>#</td>
+                            <td><?= htmlspecialchars($compte['nom'] . ' ' . $compte['prenom']) ?></td>
+                            <td><?= htmlspecialchars($compte['niveau_habilitation']) ?></td>
+                            <td><?= htmlspecialchars($compte['pseudo']) ?></td>
                             <td>
-                              <a href='/TEMPLATE/production/modif/modif_user_liste.php?id=<?= $emp['id_personnel'] ?>' class='btn btn-edit btn-sm'><i class='fa fa-edit'></i></a>
-                              <a href='employe_table.php?delete=<?= $emp['id_personnel'] ?>' class='btn btn-delete btn-sm' onclick='return confirm("Supprimer cet employé ?")'><i class='fa fa-trash'></i></a>
+                              <a href='/TEMPLATE/production/modif/modif_user_liste.php?id=<?= $compte['id_compte'] ?>' class='btn btn-edit btn-sm'><i class='fa fa-edit'></i></a>
+                              <a href='user_table.php?delete=<?= $compte['id_compte'] ?>' class='btn btn-delete btn-sm' onclick='return confirm("Supprimer cet utilisateur ?")'><i class='fa fa-trash'></i></a>
                             </td>
                           </tr>
                           <?php endforeach; ?>
