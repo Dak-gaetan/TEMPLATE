@@ -1,27 +1,29 @@
-<!--php
-// require_once '../../config/config_db.php';
+<?php
+require_once '../../config/config_db.php';
 
-// // Suppression employé si demandé
-// if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
-//     $id = (int)$_GET['delete'];
-//     $stmt = $pdo->prepare("DELETE FROM personnel WHERE id_personnel = :id_personnel");
-//     $stmt->execute(['id_personnel' => $id]);
-//     header("Location: /TEMPLATE/production/table/employe_table.php");
-//     exit;
-// }
+// Suppression employé si demandé
+if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
+    $id = (int)$_GET['delete'];
+    $stmt = $pdo->prepare("DELETE FROM personnel WHERE id_personnel = :id_personnel");
+    $stmt->execute(['id_personnel' => $id]);
+    header("Location: /TEMPLATE/production/table/employe_table.php");
+    exit;
+}
 
 // Récupération des employés avec jointures pour afficher les libellés
-// $sql = "SELECT p.id_personnel, p.nom, p.prenom, p.email, p.tel, p.nom_utilisateur,
-//                poste.libelle AS poste, service.libelle AS service, disponibilite.libelle AS disponibilite,
-//                niveau.libelle AS niveau_habilitation
-//         FROM personnel p
-//         LEFT JOIN poste ON p.id_poste = poste.id_poste
-//         LEFT JOIN service ON p.id_service = service.id_service
-//         LEFT JOIN disponibilite ON p.id_disponibilite = disponibilite.id_disponibilite
-//         LEFT JOIN niveau ON p.id_niveau = niveau.id_niveau
-//         ORDER BY p.id_personnel DESC";
-// $employes = $pdo->query($sql)->fetchAll();
--->
+$sql = "SELECT 
+          p.id_personnel, 
+          p.nom, 
+          p.prenom, 
+          b.code_badge, 
+          b.date_emission, 
+          b.actif
+        FROM personnel p
+        LEFT JOIN badge b ON p.id_personnel = b.id_personnel
+        ORDER BY p.nom, p.prenom";
+$employes = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
   <head>
@@ -72,34 +74,34 @@
                       <table id="datatable" class="table table-striped table-bordered" style="width:100%">
                         <thead>
                           <tr>
-                        
                             <th>Employés</th>
-                            <th>TAG ID</th>
+                            <th>ÉTAT</th>
                             <th>CODE BADGE</th>
-                            <th>DATE D'EMISSION</th>
-                                        
+                            <th>DATE D'ÉMISSION</th>
                             <th>Actions</th>
                           </tr>
                         </thead>
                         <tbody>
-                          <!--php $num = 1; foreach ($employes as $emp): ?>
-                          <!-- <tr>
-                            <td><?= $num++ ?></td>
-                            <td><= htmlspecialchars($emp['nom']) ?></td>
-                            <td>?= htmlspecialchars($emp['prenom']) ?></td>
-                            <td><= htmlspecialchars($emp['email']) ?></td>
-                            <td><= htmlspecialchars($emp['tel']) ?></td>
-                            <td><= htmlspecialchars($emp['nom_utilisateur']) ?></td>
-                            <td><= htmlspecialchars($emp['poste']) ?></td>
-                            <td><= htmlspecialchars($emp['service']) ?></td>
-                            <td><= htmlspecialchars($emp['disponibilite']) ?></td>
-                            -->
-                            <!-- <td>
+                          <?php foreach ($employes as $emp): ?>
+                          <tr>
+                            <td><?= htmlspecialchars($emp['nom'] . ' ' . $emp['prenom']) ?></td>
+                            <td>
+                              <?php
+                                if (empty($emp['code_badge'])) {
+                                  echo '<span style="color:red;">Inactif</span>';
+                                } else {
+                                  echo ($emp['actif'] === 'oui') ? '<span style="color:green;">Actif</span>' : '<span style="color:red;">Inactif</span>';
+                                }
+                              ?>
+                            </td>
+                            <td><?= !empty($emp['code_badge']) ? htmlspecialchars($emp['code_badge']) : '—' ?></td>
+                            <td><?= !empty($emp['date_emission']) ? htmlspecialchars($emp['date_emission']) : '—' ?></td>
+                            <td>
                               <a href='/TEMPLATE/production/modif/modif_employe_liste.php?id=<?= $emp['id_personnel'] ?>' class='btn btn-edit btn-sm'><i class='fa fa-edit'></i></a>
                               <a href='employe_table.php?delete=<?= $emp['id_personnel'] ?>' class='btn btn-delete btn-sm' onclick='return confirm("Supprimer cet employé ?")'><i class='fa fa-trash'></i></a>
-                            </td> -->
+                            </td>
                           </tr>
-                          <!--php endforeach; -->
+                          <?php endforeach; ?>
                         </tbody>
                       </table>
                     </div>

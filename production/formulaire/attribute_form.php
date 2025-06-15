@@ -1,11 +1,10 @@
 <?php
 require_once '../../config/config_db.php';
 $personnes = $pdo->query("
-    SELECT p.id_personnel, p.nom, p.prenom, p.id_poste, p.id_service, 
-           poste.libelle AS poste_libelle, service.libelle AS service_libelle
+    SELECT p.id_personnel, p.nom, p.prenom
     FROM personnel p
-    LEFT JOIN poste ON p.id_poste = poste.id_poste
-    LEFT JOIN service ON p.id_service = service.id_service
+    LEFT JOIN badge b ON p.id_personnel = b.id_personnel
+    WHERE b.code_badge IS NULL OR b.actif != 'oui'
     ORDER BY p.nom, p.prenom
 ")->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -128,8 +127,8 @@ $personnes = $pdo->query("
                                                     <option value="">-- Sélectionner --</option>
                                                     <?php foreach ($personnes as $perso): ?>
                                                         <option value="<?= $perso['id_personnel'] ?>"
-                                                            data-poste="<?= htmlspecialchars($perso['poste_libelle']) ?>"
-                                                            data-service="<?= htmlspecialchars($perso['service_libelle']) ?>"
+                                                            data-poste="<?= htmlspecialchars($perso['poste.libelle']) ?>"
+                                                            data-service="<?= htmlspecialchars($perso['service.libelle']) ?>"
                                                         >
                                                             <?= htmlspecialchars($perso['nom'] . ' ' . $perso['prenom']) ?>
                                                         </option>

@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = "<div class='alert alert-warning'>Les mots de passe ne correspondent pas.</div>";
         } else {
             // Vérifier si l'email existe déjà dans compte
-            $check = $pdo->prepare("SELECT COUNT(*) FROM compte WHERE email = :email");
+            $check = $pdo->prepare("SELECT COUNT(*) FROM personnel WHERE email = :email");
             $check->execute(['email' => $email]);
             if ($check->fetchColumn() > 0) {
                 $message = "<div class='alert alert-danger'>Cet email existe déjà dans la base.</div>";
@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
                 // Insertion dans la table compte (sans id_niveau)
-                $stmt = $pdo->prepare("INSERT INTO compte 
+                $stmt = $pdo->prepare("INSERT INTO personnel 
                     (nom, prenom, email, tel, id_poste, id_service, id_disponibilite, nom_utilisateur, mot_de_passe) 
                     VALUES 
                     (:nom, :prenom, :email, :tel, :id_poste, :id_service, :id_disponibilite, :nom_utilisateur, :mot_de_passe)");
