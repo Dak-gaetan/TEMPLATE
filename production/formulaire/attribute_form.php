@@ -1,3 +1,15 @@
+<?php
+require_once '../../config/config_db.php';
+$personnes = $pdo->query("
+    SELECT p.id_personnel, p.nom, p.prenom, p.id_poste, p.id_service, 
+           poste.libelle AS poste_libelle, service.libelle AS service_libelle
+    FROM personnel p
+    LEFT JOIN poste ON p.id_poste = poste.id_poste
+    LEFT JOIN service ON p.id_service = service.id_service
+    ORDER BY p.nom, p.prenom
+")->fetchAll(PDO::FETCH_ASSOC);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -104,17 +116,21 @@
                                         }
                                     }
                                     -->
-                                    <form class="" action="" method="post" novalidate>
+                                    <?php if (!empty($message)) echo $message; ?>
+<form action="" method="post">
                                         <span class="section"></span>
 
                                         <div class="field item form-group">
                                             <label class="col-form-label col-md-3 col-sm-3 label-align">Employés
                                                 <span class="required">*</span></label>
                                             <div class="col-md-6 col-sm-6">
-                                                <select class="form-control" name="id_personnel" required>
-                                                    <option value="">Sélectionner les personnels</option>
+                                                <select class="form-control" id="id_personnel" name="id_personnel" required>
+                                                    <option value="">-- Sélectionner --</option>
                                                     <?php foreach ($personnes as $perso): ?>
-                                                        <option value="<?= $perso['id_personnel'] ?>">
+                                                        <option value="<?= $perso['id_personnel'] ?>"
+                                                            data-poste="<?= htmlspecialchars($perso['poste_libelle']) ?>"
+                                                            data-service="<?= htmlspecialchars($perso['service_libelle']) ?>"
+                                                        >
                                                             <?= htmlspecialchars($perso['nom'] . ' ' . $perso['prenom']) ?>
                                                         </option>
                                                     <?php endforeach; ?>
@@ -125,26 +141,14 @@
                                             <label class="col-form-label col-md-3 col-sm-3 label-align">Poste
                                                 <span class="required">*</span></label>
                                             <div class="col-md-6 col-sm-6">
-                                                <select class="form-control" name="id_niveau" required>
-                                                    <option value="">Sélectionner le poste</option>
-                                                    <!--php foreach ($niveaux as $niveau): -->
-                                                        <option value="<?= $niveau['id_niveau'] ?>">
-                                                            <?= htmlspecialchars($niveau['libelle']) ?></option>
-                                                    <!--php endforeach; -->
-                                                </select>
+                                                <input type="text" class="form-control" id="poste" name="poste" readonly>
                                             </div>
                                         </div>
-                                         <div class="field item form-group">
-                                            <label class="col-form-label col-md-3 col-sm-3 label-align">  Service
+                                        <div class="field item form-group">
+                                            <label class="col-form-label col-md-3 col-sm-3 label-align">Service
                                                 <span class="required">*</span></label>
                                             <div class="col-md-6 col-sm-6">
-                                                <select class="form-control" name="id_niveau" required>
-                                                    <option value="">Sélectionner le service</option>
-                                                    <!--php foreach ($niveaux as $niveau): -->
-                                                        <option value="<?= $niveau['id_niveau'] ?>">
-                                                            <?= htmlspecialchars($niveau['libelle']) ?></option>
-                                                    <!--php endforeach; -->
-                                                </select>
+                                                <input type="text" class="form-control" id="service" name="service" readonly>
                                             </div>
                                         </div>
                              
@@ -157,37 +161,28 @@
                                 </div>
                                
                                         <div class="field item form-group">
-                                            <label class="col-form-label col-md-3 col-sm-3  label-align">Tag ID<span
+                                            <!-- <label class="col-form-label col-md-3 col-sm-3  label-align">Tag ID<span
                                                     class="required">*</span></label>
                                                     
                                             <div class="col-md-6 col-sm-6">
                                                 <input class="form-control" name="pseudo" required="required"
                                                     type="text" placeholder="Sélectionner tag id" />
-                                            </div>
-                                        </div>
+                                            </div> -->
+                                         </div>
 
-                                        <div class="field item form-group">
-                                            <label class="col-form-label col-md-3 col-sm-3  label-align">Code Badge<span
-                                                    class="required">*</span></label>
-                                                    
+                                         <div class="field item form-group">
+                                            <label class="col-form-label col-md-3 col-sm-3  label-align">Code Badge<span class="required">*</span></label>
                                             <div class="col-md-6 col-sm-6">
-                                                <input class="form-control" name="pseudo" required="required"
+                                                <input class="form-control" name="code_badge" required="required"
                                                     type="text" placeholder="Sélectionner code badge"  />
                                             </div>
                                         </div>
 
                                       <div class="item form-group">
-											<label class="col-form-label col-md-3 col-sm-3 label-align">Date d'émission <span class="required">*</span>
-											</label>
+											<label class="col-form-label col-md-3 col-sm-3 label-align">Date d'émission <span class="required">*</span></label>
 											<div class="col-md-6 col-sm-6 ">
-												<input id="birthday" class="date-picker form-control" placeholder="dd-mm-yyyy" type="text" required="required" type="text" onfocus="this.type='date'" onmouseover="this.type='date'" onclick="this.type='date'" onblur="this.type='text'" onmouseout="timeFunctionLong(this)">
-												<script>
-													function timeFunctionLong(input) {
-														setTimeout(function() {
-															input.type = 'text';
-														}, 60000);
-													}
-												</script>
+												<input name="date_emission" class="date-picker form-control" placeholder="dd-mm-yyyy" required="required"
+                                                    type="date">
 											</div>
 										</div>
 
@@ -279,7 +274,54 @@
 
     <!-- Custom Theme Scripts -->
     <script src="../../build/js/custom.min.js"></script>
+    <script>
+document.getElementById('id_personnel').addEventListener('change', function() {
+    var selected = this.options[this.selectedIndex];
+    document.getElementById('poste').value = selected.getAttribute('data-poste') || '';
+    document.getElementById('service').value = selected.getAttribute('data-service') || '';
+});
+</script>
 
 </body>
 
 </html>
+
+<?php
+$message = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $code_badge = $_POST['code_badge'];
+    $date_emission = $_POST['date_emission'];
+    $id_personnel = $_POST['id_personnel'];
+
+    $conn = new mysqli('localhost', 'root', '', 'template');
+    if ($conn->connect_error) {
+        die("Connexion échouée : " . $conn->connect_error);
+    }
+
+    // Vérifier si le code_badge existe déjà
+    $check = $conn->prepare("SELECT COUNT(*) FROM badge WHERE code_badge = ?");
+    $check->bind_param("s", $code_badge);
+    $check->execute();
+    $check->bind_result($count);
+    $check->fetch();
+    $check->close();
+
+    if ($count > 0) {
+        $message = "<div class='alert alert-danger'>Le code badge existe déjà.</div>";
+    } else {
+        $stmt = $conn->prepare("INSERT INTO badge (code_badge, date_emission, id_personnel) VALUES (?, ?, ?)");
+        $stmt->bind_param("ssi", $code_badge, $date_emission, $id_personnel);
+
+        if ($stmt->execute()) {
+            $message = "<div class='alert alert-success'>Badge ajouté avec succès !</div>";
+        } else {
+            $message = "<div class='alert alert-danger'>Erreur lors de l'ajout du badge : " . $stmt->error . "</div>";
+        }
+
+        $stmt->close();
+    }
+
+    $conn->close();
+}
+?>
+

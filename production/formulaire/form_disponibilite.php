@@ -54,57 +54,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             include("../navigation.php");
             ?>
             <!-- /top navigation -->
+             <div>
+                <!--mettre de l'espace entre navigation et page content-->
+                <div style="height: 100px;"></div>
 
+             </div>
             <!-- page content -->
-            <div class="right_col" role="main">
-                <div class="">
-                    <div class="page-title">
-                        <div class="title_left">
-                            <h3>Formulaire Service</h3>
-                        </div>
-
-                       
-                    </div>
-                    <div class="clearfix"></div>
-
-                    <div class="row">
-                        <div class="col-md-12 col-sm-12">
-                            <div class="x_panel">
-                                <div class="x_title">
-                                    <h2>SERVICE</h2>
-                                    <ul class="nav navbar-right panel_toolbox">
-                                        <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                                        </li>
-                                       
-                                        <li><a class="close-link"><i class="fa fa-close"></i></a>
-                                        </li>
-                                    </ul>
-                                    <div class="clearfix"></div>
-                                </div>
-                                <div class="x_content">
-                                    <?php if ($message) echo $message; ?>
-                                    <form class="" action="" method="post" novalidate>
-                                        <span class="section">Ajouter Disponibilité</span>
-                                        <div class="field item form-group">
-                                            <label class="col-form-label col-md-3 col-sm-3  label-align">Libellé<span class="required">*</span></label>
-                                            <div class="col-md-6 col-sm-6">
-                                                <input class="form-control" name="libelle" required="required" type="text" />
-                                            </div>
-                                        </div>
-                                        <div class="ln_solid">
-                                            <div class="form-group">
-                                                <div class="col-md-6 offset-md-3">
-                                                    <button type='submit' class="btn btn-primary">Soumettre</button>
-                                                    <button type='reset' class="btn btn-success">Annuler</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+             <div class="right_col" role="main">
+            <?php
+            include("../scan/scan.php");
+            ?>
             </div>
             <!-- /page content -->
 
@@ -167,3 +126,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </body>
 
 </html>
+
