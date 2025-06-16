@@ -1,3 +1,6 @@
+  <?php
+include_once('../config/config_db.php');
+  ?>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -46,7 +49,7 @@
         
        <!-- page content -->
        <?php include("dashboard.php"); ?>
-       <img src="/TEMPLATE/production/images/img.jpg" alt="..." class="img-circle profile_img">
+
 
     <!-- jQuery -->
     <script src="../vendors/jquery/dist/jquery.min.js"></script>

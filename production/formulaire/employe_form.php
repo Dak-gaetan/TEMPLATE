@@ -1,77 +1,8 @@
 <?php
-require_once '../../config/config_db.php';
-// Récupération des listes pour les select
-$postes = $pdo->query("SELECT id_poste, libelle FROM poste")->fetchAll();
-$services = $pdo->query("SELECT id_service, libelle FROM service")->fetchAll();
-$dispos = $pdo->query("SELECT id_disponibilite, libelle FROM disponibilite")->fetchAll();
-
-$message = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nom = trim($_POST['nom'] ?? '');
-    $prenom = trim($_POST['prenom'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $confirm_email = trim($_POST['confirm_email'] ?? '');
-    $telephone = trim($_POST['telephone'] ?? '');
-    $id_poste = (int)($_POST['id_poste'] ?? 0);
-    $id_service = (int)($_POST['id_service'] ?? 0);
-    $id_disponibilite = (int)($_POST['id_disponibilite'] ?? 0);
-    $username = trim($_POST['username'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $confirm_password = $_POST['confirm_password'] ?? '';
-
-    $tel = trim($_POST['telephone'] ?? '');
-
-    if (
-        $nom && $prenom && $email && $confirm_email && $tel &&
-        $id_poste && $id_service && $id_disponibilite &&
-        $username && $password && $confirm_password
-    ) {
-        if ($email !== $confirm_email) {
-            $message = "<div class='alert alert-warning'>Les emails ne correspondent pas.</div>";
-        } elseif ($password !== $confirm_password) {
-            $message = "<div class='alert alert-warning'>Les mots de passe ne correspondent pas.</div>";
-        } else {
-            // Vérifier si l'email existe déjà dans compte
-            $check = $pdo->prepare("SELECT COUNT(*) FROM personnel WHERE email = :email");
-            $check->execute(['email' => $email]);
-            if ($check->fetchColumn() > 0) {
-                $message = "<div class='alert alert-danger'>Cet email existe déjà dans la base.</div>";
-            } else {
-                $password_hash = password_hash($password, PASSWORD_DEFAULT);
-
-                // Insertion dans la table compte (sans id_niveau)
-                $stmt = $pdo->prepare("INSERT INTO personnel 
-                    (nom, prenom, email, tel, id_poste, id_service, id_disponibilite, nom_utilisateur, mot_de_passe) 
-                    VALUES 
-                    (:nom, :prenom, :email, :tel, :id_poste, :id_service, :id_disponibilite, :nom_utilisateur, :mot_de_passe)");
-
-                $ok = $stmt->execute([
-                    'nom' => $nom,
-                    'prenom' => $prenom,
-                    'email' => $email,
-                    'tel' => $tel,
-                    'id_poste' => $id_poste,
-                    'id_service' => $id_service,
-                    'id_disponibilite' => $id_disponibilite,
-                    'nom_utilisateur' => $username,
-                    'mot_de_passe' => $password_hash
-                ]);
-
-                if ($ok) {
-                    $message = "<div class='alert alert-success'>Compte ajouté avec succès !</div>";
-                    header("Location: /TEMPLATE/production/table/compte_table.php");
-                    exit;
-                } else {
-                    $message = "<div class='alert alert-danger'>Erreur lors de l'ajout du compte.</div>";
-                }
-            }
-        }
-    } else {
-        $message = "<div class='alert alert-warning'>Veuillez remplir tous les champs.</div>";
-    }
-}
+include_once("../../config/config_db.php");
+include_once("php_of_employe.php");
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 

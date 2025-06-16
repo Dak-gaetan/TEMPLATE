@@ -1,3 +1,8 @@
+<?php
+include_once("../../config/config_db.php");
+include_once("php_of_login.php");
+?>
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -39,43 +44,11 @@
                 <input type="password" name="password" class="form-control" placeholder="Password" required="" />
               </div>
               <div>
-                <button type="submit" class="btn btn-default submit">Log in</button>
+                <button type="submit" class="btn btn-default submit" name='valider'>Log in</button>
                 <a class="reset_pass" href="#">Lost your password?</a>
               </div>
 
-              <div class="clearfix"></div>
-
-              <?php
-              require_once '../../config/config_db.php';
-              session_start();
-
-              $message = '';
-
-              if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                  $pseudo = trim($_POST['pseudo'] ?? '');
-                  $password = $_POST['password'] ?? '';
-
-                  if ($pseudo && $password) {
-                      // Vérification dans la table compte
-                      $stmt = $pdo->prepare("SELECT * FROM compte WHERE pseudo = :pseudo");
-                      $stmt->execute(['pseudo' => $pseudo]);
-                      $compte = $stmt->fetch();
-
-                      if ($compte && password_verify($password, $compte['mot_de_passe'])) {
-                          // Connexion réussie, redirection
-                          $_SESSION['user_id'] = $compte['id_compte'];
-                          header("Location: /TEMPLATE/production/index.php");
-                          exit;
-                      } else {
-                          $message = "<div class='alert alert-danger'>Pseudo ou mot de passe incorrect.</div>";
-                      }
-                  } else {
-                      $message = "<div class='alert alert-warning'>Veuillez remplir tous les champs.</div>";
-                  }
-              }
-              ?>
-
-              
+              <div class="clearfix"></div> 
               
             </form>
           </section>
@@ -84,5 +57,6 @@
         
       </div>
     </div>
+   
   </body>
 </html>

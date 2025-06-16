@@ -1,5 +1,12 @@
+<?php
+include_once("../../config/config_db.php");
+include_once("php_of_user.php");
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
+
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -62,48 +69,8 @@
                                 </div>
                                 <div class="x_content">
 
-                                    <?php
-                                    require_once '../../config/config_db.php';
-                                    $message = '';
-                                    $ok = false;
+                                    <?php if (!empty($message)) echo $message; ?>
 
-                                    // Récupération des personnels et des niveaux d'habilitation
-                                    $personnes = $pdo->query("SELECT id_personnel, nom, prenom FROM personnel ORDER BY nom, prenom")->fetchAll();
-                                    $niveaux = $pdo->query("SELECT id_niveau, libelle FROM niveau ORDER BY libelle")->fetchAll();
-
-                                    // Traitement du formulaire
-                                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                                        $id_personnel = (int)($_POST['id_personnel'] ?? 0);
-                                        $pseudo = trim($_POST['pseudo'] ?? '');
-                                        $password = $_POST['password'] ?? '';
-                                        $confirm_password = $_POST['confirm_password'] ?? '';
-                                        $id_niveau = (int)($_POST['id_niveau'] ?? 0);
-
-                                        if ($id_personnel && $pseudo && $password && $confirm_password && $id_niveau) {
-                                            if ($password !== $confirm_password) {
-                                                $message = "<div class='alert alert-warning'>Les mots de passe ne correspondent pas.</div>";
-                                            } else {
-                                                // Vérifier si un compte existe déjà pour cette personne
-                                                $check = $pdo->prepare("SELECT COUNT(*) FROM compte WHERE id_personnel = :id_personnel");
-                                                $check->execute(['id_personnel' => $id_personnel]);
-                                                if ($check->fetchColumn() > 0) {
-                                                    $message = "<div class='alert alert-danger'>Un compte existe déjà pour cette personne.</div>";
-                                                } else {
-                                                    $password_hash = password_hash($password, PASSWORD_DEFAULT);
-                                                    $stmt = $pdo->prepare("INSERT INTO compte (id_personnel, pseudo, mot_de_passe, id_niveau) VALUES (:id_personnel, :pseudo, :mot_de_passe, :id_niveau)");
-                                                    $ok = $stmt->execute([
-                                                        'id_personnel' => $id_personnel,
-                                                        'pseudo' => $pseudo,
-                                                        'mot_de_passe' => $password_hash,
-                                                        'id_niveau' => $id_niveau
-                                                    ]);
-                                                }
-                                            }
-                                        } else {
-                                            $message = "<div class='alert alert-warning'>Veuillez remplir tous les champs.</div>";
-                                        }
-                                    }
-                                    ?>
                                     <form class="" action="" method="post" novalidate>
                                         <span class="section"></span>
 
@@ -160,7 +127,7 @@
                                         <div class="ln_solid">
                                             <div class="form-group">
                                                 <div class="col-md-6 offset-md-3">
-                                                    <button type='submit' class="btn btn-primary">Soumettre</button>
+                                                    <button type='submit' class="btn btn-primary" name = 'btn_valider' >Soumettre</button>
                                                     <button type='reset' class="btn btn-success">Annuler</button>
                                                 </div>
                                             </div>
@@ -168,11 +135,6 @@
 
 
                                     </form>
-                                    <?php if ($ok): ?>
-                                        <div class='alert alert-success'>Compte créé avec succès !</div>
-                                    <?php elseif ($message): ?>
-                                        <?= $message ?>
-                                    <?php endif; ?>
 
                                 </div>
                             </div>

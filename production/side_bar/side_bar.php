@@ -1,3 +1,10 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$nom = isset($_SESSION['nom']) ? $_SESSION['nom'] : '';
+?>
+
 <div class="col-md-3 left_col">
           <div class="left_col scroll-view">
             <div class="navbar nav_title" style="border: 0;">
@@ -12,8 +19,8 @@
                 <img src="/TEMPLATE/production/images/img.jpg" alt="..." class="img-circle profile_img">
               </div>
               <div class="profile_info">
-                <span>Welcome,</span>
-                <h2>JUNIOR ELA</h2>
+                <span>Bienvenue</span>
+                <h2><?php echo $_SESSION['pseudo'] ?></h2>
               </div>
             </div>
             <!-- /menu profile quick info -->
@@ -28,7 +35,7 @@
                   <li><a><i class="fa fa-home"></i> Home <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
                       
-                      <li><a href="/TEMPLATE/production/index.php">Dashboard3</a></li>
+                      <li><a href="/TEMPLATE/production/index.php">Dashboard</a></li>
                     </ul>
                   </li>
                   <li><a><i class="fa fa-edit"></i> Employé <span class="fa fa-chevron-down"></span></a>
