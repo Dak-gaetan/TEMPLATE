@@ -1,5 +1,6 @@
 <?php
 require_once '../../config/config_db.php';
+require_once('../../config/securite.php');
 
 // Récupération des listes pour les select
 $postes = $pdo->query("SELECT id_poste, libelle FROM poste")->fetchAll();

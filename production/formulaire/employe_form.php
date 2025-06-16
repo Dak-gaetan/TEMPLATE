@@ -1,5 +1,6 @@
 <?php
 include_once("../../config/config_db.php");
+require_once('../../config/securite.php');
 include_once("php_of_employe.php");
 ?>
 

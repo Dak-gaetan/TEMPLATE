@@ -1,5 +1,6 @@
 <?php
 require_once '../../config/config_db.php';
+require_once('../../config/securite.php');
 
 // Suppression si demandé
 if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {

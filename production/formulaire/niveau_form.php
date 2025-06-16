@@ -1,5 +1,6 @@
 <?php
 require_once '../../config/config_db.php';
+require_once('../../config/securite.php');
 
 $message = '';
 
