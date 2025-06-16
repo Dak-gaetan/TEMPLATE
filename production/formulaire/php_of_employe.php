@@ -31,14 +31,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = "<div class='alert alert-danger'>Cet email existe déjà dans la base.</div>";
         } else {
             $password_hash = password_hash($password, PASSWORD_DEFAULT);
+            $user_create = $_SESSION['user_id']; // L'ID du compte connecté
+
             $stmt = $pdo->prepare("INSERT INTO personnel 
-                (nom, prenom, email, tel, id_poste, id_service, id_disponibilite, nom_utilisateur, mot_de_passe) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                (nom, prenom, email, tel, id_poste, id_service, id_disponibilite, nom_utilisateur, mot_de_passe, user_create) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $ok = $stmt->execute([
-                $nom, $prenom, $email, $telephone, $id_poste, $id_service, $id_disponibilite, $username, $password_hash
+                $nom, $prenom, $email, $telephone, $id_poste, $id_service, $id_disponibilite, $username, $password_hash, $user_create
             ]);
             if ($ok) {
-                header("Location: /TEMPLATE/production/table/compte_table.php");
+                header("Location: /TEMPLATE/production/table/user_table.php");
                 exit;
             } else {
                 $message = "<div class='alert alert-danger'>Erreur lors de l'ajout du compte.</div>";

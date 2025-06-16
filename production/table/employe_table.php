@@ -19,7 +19,8 @@ $sql = "SELECT p.id_personnel, p.nom, p.prenom, p.email, p.tel, p.nom_utilisateu
         LEFT JOIN poste ON p.id_poste = poste.id_poste
         LEFT JOIN service ON p.id_service = service.id_service
         LEFT JOIN disponibilite ON p.id_disponibilite = disponibilite.id_disponibilite
-        LEFT JOIN niveau ON p.id_niveau = niveau.id_niveau
+        LEFT JOIN compte c ON p.id_personnel = c.id_personnel
+        LEFT JOIN niveau ON c.id_niveau = niveau.id_niveau
         ORDER BY p.id_personnel DESC";
 $employes = $pdo->query($sql)->fetchAll();
 ?>
