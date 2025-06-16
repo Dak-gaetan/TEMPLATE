@@ -3,6 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 $nom = isset($_SESSION['nom']) ? $_SESSION['nom'] : '';
+$pseudo = isset($_SESSION['pseudo']) ? $_SESSION['pseudo'] : '';
 ?>
 
 <div class="col-md-3 left_col">
@@ -20,7 +21,7 @@ $nom = isset($_SESSION['nom']) ? $_SESSION['nom'] : '';
               </div>
               <div class="profile_info">
                 <span>Bienvenue</span>
-                <h2><?php echo $_SESSION['pseudo'] ?></h2>
+                <h2><?php echo htmlspecialchars($pseudo); ?></h2>
               </div>
             </div>
             <!-- /menu profile quick info -->
