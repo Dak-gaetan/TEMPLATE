@@ -1,7 +1,6 @@
 <?php
 include_once("../../config/config_db.php");
 include_once("php_of_login.php");
-
 ?>
 
 <!DOCTYPE html>
@@ -51,6 +50,7 @@ include_once("php_of_login.php");
               <div class="clearfix"></div> 
               
             </form>
+            <?php if (!empty($message)) { echo $message; } ?>
           </section>
         </div>
 
