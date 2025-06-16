@@ -1,6 +1,7 @@
 <?php
 include_once("../../config/config_db.php");
 include_once("php_of_login.php");
+
 ?>
 
 <!DOCTYPE html>
@@ -45,7 +46,6 @@ include_once("php_of_login.php");
               </div>
               <div>
                 <button type="submit" class="btn btn-default submit" name='valider'>Log in</button>
-                <a class="reset_pass" href="#">Lost your password?</a>
               </div>
 
               <div class="clearfix"></div> 

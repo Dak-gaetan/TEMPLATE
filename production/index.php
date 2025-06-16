@@ -1,5 +1,6 @@
   <?php
 include_once('../config/config_db.php');
+require_once('../config/securite.php');
   ?>
 <!DOCTYPE html>
 <html lang="en">
