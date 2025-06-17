@@ -11,4 +11,9 @@ catch (Exception $erreur)
 {
     die('Erreur: ' . $erreur->getMessage());
 }
+
+if (!$pdo) {
+    echo json_encode(['found' => false, 'error' => 'Erreur connexion BDD']);
+    exit;
+}
 ?>
