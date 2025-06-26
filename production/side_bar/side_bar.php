@@ -71,7 +71,7 @@ $pseudo = isset($_SESSION['pseudo']) ? $_SESSION['pseudo'] : '';
                   </li>
                   <li><a><i class="fa fa-edit"></i> Badge <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
-                      <li><a href="/TEMPLATE/production/scan/scan.php">Scanner Badge</a></li>
+                      <li><a href="/TEMPLATE/production/scan/scan_officiel.php">Scanner Badge</a></li>
                       <li><a href="/TEMPLATE/production/formulaire/attribute_form.php">Attribuer Badge</a></li>
                        <li><a href="/TEMPLATE/production/table/badge_table.php">Liste Badge</a></li>
                     </ul>

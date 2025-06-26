@@ -1,6 +1,7 @@
 <?php
 require_once '../../config/config_db.php';
 require_once('../../config/securite.php');
+require_once '../phpqrcode/qrlib.php';
 
 $message = '';
 
@@ -48,6 +49,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
     }
     $conn->close();
+
+    // Générer le QR code tout de suite après avoir attribué le badge
+    if (!empty($code_badge) && $id_personnel > 0) {
+        $qr_dir = __DIR__ . '/../qr_codes/';
+        if (!is_dir($qr_dir)) mkdir($qr_dir, 0777, true);
+
+        $qr_filename = 'qr_' . $code_badge . '.png';
+        $qr_path = $qr_dir . $qr_filename;
+        $qr_code_rel = 'qr_codes/' . $qr_filename;
+
+        QRcode::png($code_badge, $qr_path, 'H', 10, 2);
+
+        // Met à jour la table personnel
+        $stmt = $pdo->prepare("UPDATE personnel SET qr_code = :qr_code WHERE id_personnel = :id_personnel");
+        $stmt->bindValue(':qr_code', $qr_code_rel, PDO::PARAM_STR);
+        $stmt->bindValue(':id_personnel', $id_personnel, PDO::PARAM_INT);
+        $stmt->execute();
+    }
 }
 ?>
 
@@ -186,16 +205,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script src="../../vendors/validator/multifield.js"></script>
-    <script src="../../vendors/validator/validator.js"></script>
+    <!-- jQuery -->
     <script src="../../vendors/jquery/dist/jquery.min.js"></script>
+    <!-- Bootstrap -->
     <script src="../../vendors/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- FastClick -->
     <script src="../../vendors/fastclick/lib/fastclick.js"></script>
+    <!-- NProgress -->
     <script src="../../vendors/nprogress/nprogress.js"></script>
+    <!-- Custom Theme Scripts -->
     <script src="../../build/js/custom.min.js"></script>
+
     <script>
-    document.getElementById('id_personnel').addEventListener('change', function() {
+        document.getElementById('id_personnel').addEventListener('change', function() {
         var selected = this.options[this.selectedIndex];
         document.getElementById('poste').value = selected.getAttribute('data-poste') || '';
         document.getElementById('service').value = selected.getAttribute('data-service') || '';

@@ -144,8 +144,16 @@ $employes = $pdo->query($sql)->fetchAll();
                             <td><?= htmlspecialchars($emp['email']) ?></td>
                             <td><?= htmlspecialchars($emp['tel']) ?></td>
                             <td><?= htmlspecialchars($emp['nom_utilisateur']) ?></td>
-                            <td><?= htmlspecialchars($emp['poste']) ?></td>
-                            <td><?= htmlspecialchars($emp['service']) ?></td>
+                            <td>
+                              <?php
+                              echo htmlspecialchars($emp['poste'] ?? '');
+                              ?>
+                            </td>
+                            <td>
+                              <?php
+                              echo htmlspecialchars($emp['service'] ?? '');
+                              ?>
+                            </td>
                             <td><?= htmlspecialchars($emp['disponibilite']) ?></td>
                             <td>
                               <a href='/TEMPLATE/production/modif/modif_employe_liste.php?id=<?= $emp['id_personnel'] ?>' class='btn btn-edit btn-sm'><i class='fa fa-edit'></i></a>
