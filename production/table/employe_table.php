@@ -11,6 +11,8 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     exit;
 }
 
+
+
 // Récupération des employés avec jointures pour afficher les libellés
 $sql = "SELECT p.id_personnel, p.nom, p.prenom, p.email, p.tel, p.nom_utilisateur,
                poste.libelle AS poste, service.libelle AS service, disponibilite.libelle AS disponibilite,
