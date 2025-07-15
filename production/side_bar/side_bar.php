@@ -39,6 +39,15 @@ $pseudo = isset($_SESSION['pseudo']) ? $_SESSION['pseudo'] : '';
                       <li><a href="/TEMPLATE/production/index.php">Dashboard</a></li>
                     </ul>
                   </li>
+                
+                 <li><a><i class="fa fa-edit"></i> Scanne <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="/TEMPLATE/production/scan/scan.php">Scanner </a></li>
+                      <li><a href="/TEMPLATE/production/table/manuel_table.php">Manuel Badge</a></li>
+           
+                    </ul>
+                  </li>
+
                   <li><a><i class="fa fa-edit"></i> Employé <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
                       <li><a href="/TEMPLATE/production/formulaire/employe_form.php">Ajouter</a></li>
@@ -78,7 +87,7 @@ $pseudo = isset($_SESSION['pseudo']) ? $_SESSION['pseudo'] : '';
                   </li>
                   <li><a><i class="fa fa-edit"></i> Niveau d'habilitation <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
-                      <li><a href="/TEMPLATE/production/formulaire/niveau_form.php">Ajouter</a></li>
+                      <li><a href="/TEMPLATE/production/formulaire/niveau_form.php">Ajouter</a></
                       <li><a href="/TEMPLATE/production/table/niveau_table.php">Liste</a></li>
                     </ul>
                   </li>
