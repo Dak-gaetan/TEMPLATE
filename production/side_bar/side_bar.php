@@ -91,7 +91,7 @@ $pseudo = isset($_SESSION['pseudo']) ? $_SESSION['pseudo'] : '';
                   </li>
                   <li><a><i class="fa fa-edit"></i> Niveau d'habilitation <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
-                      <li><a href="/TEMPLATE/production/formulaire/niveau_form.php">Ajouter</a></li>
+                      <li><a href="/TEMPLATE/production/formulaire/niveau_form.php">Ajouter</a></
                       <li><a href="/TEMPLATE/production/table/niveau_table.php">Liste</a></li>
                     </ul>
                   </li>
