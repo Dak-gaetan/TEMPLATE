@@ -26,6 +26,7 @@ if ($code) {
             'poste' => $row['poste'],
             'service' => $row['service']
         ];
+        
     }
 }
 echo json_encode($result);

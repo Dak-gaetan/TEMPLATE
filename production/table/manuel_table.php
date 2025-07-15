@@ -1,5 +1,39 @@
+<?php
+require_once '../../config/config_db.php';
+
+// Récupère tous les employés
+$employes = [];
+$stmt = $pdo->query("SELECT id_personnel, nom, prenom FROM personnel ORDER BY nom, prenom");
+$employes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Récupère tous les pointages avec le nom/prénom de l'employé
+$pointages = [];
+$sql = "SELECT 
+            pers.nom,
+            pers.prenom,
+            p.date_pointage,
+            p.heure_entrer,
+            p.heure_sorti,
+            p.duree
+        FROM pointage p
+        JOIN personnel pers ON p.id_personnel = pers.id_personnel
+        ORDER BY p.date_pointage ASC";
+$stmt = $pdo->query($sql);
+$pointages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Traitement du formulaire d'ajout de pointage
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['employeSelect'])) {
+    $id_personnel = intval($_POST['employeSelect']);
+    $date = $_POST['pointageDate'];
+    $heure_entree = $_POST['heureEntree'];
+    $heure_sortie = $_POST['heureSortie'];
 
 
+    // Insertion dans la table pointage SANS la colonne duree
+    $stmt = $pdo->prepare("INSERT INTO pointage (id_personnel, date_pointage, heure_entrer, heure_sorti) VALUES (?, ?, ?, ?)");
+    $stmt->execute([$id_personnel, $date, $heure_entree, $heure_sortie]);
+}
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -120,6 +154,17 @@
                                                     </thead>
 
                                                     <tbody>
+                                                        <?php $numero = 1; ?>
+                                                        <?php foreach ($pointages as $ptg): ?>
+                                                            <tr>
+                                                                <td><?= $numero++ ?></td>
+                                                                <td><?= htmlspecialchars($ptg['prenom'] . ' ' . $ptg['nom']) ?></td>
+                                                                <td><?= htmlspecialchars($ptg['date_pointage']) ?></td>
+                                                                <td><?= htmlspecialchars($ptg['heure_entrer']) ?></td>
+                                                                <td><?= htmlspecialchars($ptg['heure_sorti']) ?></td>
+                                                                <td><?= htmlspecialchars($ptg['duree']) ?></td>
+                                                            </tr>
+                                                        <?php endforeach; ?>
                                      </tbody>
                                                 </table>
                                             </div>
@@ -146,9 +191,9 @@
                                                         <select class="form-select" id="employeSelect"
                                                             name="employeSelect" required>
                                                             <option value="">Sélectionner un employé</option>
-                                                            <?php foreach ($manuels as $man): ?>
-                                                                <option value="<?= htmlspecialchars($man['id_manuel']) ?>">
-                                                                    <?= htmlspecialchars($man['prenom'] . ' ' . $man['nom']) ?>
+                                                            <?php foreach ($employes as $emp): ?>
+                                                                <option value="<?= htmlspecialchars($emp['id_personnel']) ?>">
+                                                                    <?= htmlspecialchars($emp['prenom'] . ' ' . $emp['nom']) ?>
                                                                 </option>
                                                             <?php endforeach; ?>
                                                         </select>
@@ -258,4 +303,4 @@
 
 </body>
 
-</html> 
+</html>
