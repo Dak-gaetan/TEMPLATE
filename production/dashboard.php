@@ -1,41 +1,97 @@
+<?php
+// Compter les employés ayant une disponibilité "Disponible"
+$stmt = $pdo->prepare("
+    SELECT COUNT(*) 
+    FROM personnel p
+    JOIN disponibilite d ON p.id_disponibilite = d.id_disponibilite
+    WHERE d.libelle = 'Disponible'
+");
+$stmt->execute();
+$disponibles_total = $stmt->fetchColumn();
+
+$today = date('Y-m-d');
+
+// Nombre total de retard parmi les disponibles (pointage entre 07:31 et 08:00)
+$stmt = $pdo->prepare("
+    SELECT COUNT(DISTINCT p.id_personnel)
+    FROM personnel p
+    JOIN disponibilite d ON p.id_disponibilite = d.id_disponibilite
+    JOIN pointage pt ON p.id_personnel = pt.id_personnel
+    WHERE d.libelle = 'Disponible'
+      AND pt.date_pointage = ?
+      AND pt.heure_entrer >= '07:31'
+      AND pt.heure_entrer <= '08:00'
+");
+$stmt->execute([$today]);
+$retards_total = $stmt->fetchColumn();
+
+// Nombre total d'absents parmi les disponibles (pas de pointage avant ou à 08:01)
+$stmt = $pdo->prepare("
+    SELECT COUNT(*) 
+    FROM personnel p
+    JOIN disponibilite d ON p.id_disponibilite = d.id_disponibilite
+    WHERE d.libelle = 'Disponible'
+      AND NOT EXISTS (
+        SELECT 1 FROM pointage pt
+        WHERE pt.id_personnel = p.id_personnel
+          AND pt.date_pointage = ?
+          AND pt.heure_entrer <= '08:01'
+      )
+");
+$stmt->execute([$today]);
+$absents_total = $stmt->fetchColumn();
+
+// Calculer le nombre de présents (non en retard et non absents)
+$presences_total = $disponibles_total - ($retards_total + $absents_total);
+$taux_presence = ($presences_total / ($disponibles_total ?: 1)) * 100;
+?>
+
 <div class="right_col" role="main">       
-            <br/>
-            
-            <!-- Indicateurs statistiques -->
-            <div class="row">
-    <div class="col-md-3 col-sm-6">
-        <div class="x_panel tile personnel-tile">
-            <div class="x_content">
-                <span class="count_top"><i class="fa fa-users"></i> Personnel Total</span>
-                <div class="count" id="total-personnel"><i class="fa fa-spinner fa-spin"></i></div>
+    <br/>
+    
+    <!-- Indicateurs statistiques -->
+    <div class="row">
+        <div class="col-md-6 col-sm-6">
+            <div class="x_panel tile personnel-tile">
+                <div class="x_content">
+                    <span class="count_top"><i class="fa fa-users"></i> Personnel Total</span>
+                    <div class="count" id="total-personnel"><i class="fa fa-spinner fa-spin"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-sm-6">
+            <div class="x_panel tile disponible-tile">
+                <div class="x_content">
+                    <span class="count_top"><i class="fa fa-user-check"></i> Nombre Total Disponible</span>
+                    <div class="count" id="disponibles-total"><?php echo $disponibles_total; ?></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-6">
+            <div class="x_panel tile presence-tile">
+                <div class="x_content">
+                    <span class="count_top"><i class="fa fa-check"></i> Présents Aujourd'hui</span>
+                    <div class="count green" id="presences-today"><?php echo $presences_total; ?></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-6">
+            <div class="x_panel tile retard-tile">
+                <div class="x_content">
+                    <span class="count_top"><i class="fa fa-clock-o"></i> Nombre Total de Retard</span>
+                    <div class="count" id="retards-total"><?php echo $retards_total; ?></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-6">
+            <div class="x_panel tile absent-tile">
+                <div class="x_content">
+                    <span class="count_top"><i class="fa fa-user-times"></i> Nombre Total d'Absent</span>
+                    <div class="count" id="absents-total"><?php echo $absents_total; ?></div>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-md-3 col-sm-6">
-        <div class="x_panel tile presence-tile">
-            <div class="x_content">
-                <span class="count_top"><i class="fa fa-check"></i> Présents Aujourd'hui</span>
-                <div class="count green" id="presences-today"><i class="fa fa-spinner fa-spin"></i></div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 col-sm-6">
-        <div class="x_panel tile duree-tile">
-            <div class="x_content">
-                <span class="count_top"><i class="fa fa-clock-o"></i> Durée Moyenne</span>
-                <div class="count" id="duree-moyenne"><i class="fa fa-spinner fa-spin"></i></div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 col-sm-6">
-        <div class="x_panel tile badge-tile">
-            <div class="x_content">
-                <span class="count_top"><i class="fa fa-credit-card"></i> Badges Actifs</span>
-                <div class="count" id="badges-actifs"><i class="fa fa-spinner fa-spin"></i></div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <style>
     /* Styles de base pour les cartes */
@@ -55,13 +111,17 @@
         background-color: #eef7ee; /* Vert clair */
         border-left: 4px solid #2ecc71; /* Bordure verte */
     }
-    .duree-tile {
-        background-color: #f9f0f0; /* Rouge clair */
-        border-left: 4px solid #e74c3c; /* Bordure rouge */
+    .retard-tile {
+        background-color: #fff3e0; /* Orange clair */
+        border-left: 4px solid #ff9800; /* Bordure orange */
     }
-    .badge-tile {
-        background-color: #f7f4f0; /* Jaune clair */
-        border-left: 4px solid #f1c40f; /* Bordure jaune */
+    .absent-tile {
+        background-color: #fce4ec; /* Rose clair */
+        border-left: 4px solid #e91e63; /* Bordure rose */
+    }
+    .disponible-tile {
+        background-color: #e3f2fd; /* Bleu très clair */
+        border-left: 4px solid #2196f3; /* Bordure bleu moyen */
     }
 
     /* Style du texte et des icônes */
@@ -87,185 +147,142 @@
         transform: translateY(-2px);
     }
 </style>
-            
-            <div class="row">
-              <div class="col-md-12 col-sm-12 ">
-                <div class="dashboard_graph x_panel">
-                  <div class="x_title">
-                    <div class="col-md-6">
-                      <h3>Pointages Personnel <small></small></h3>
-                    </div>
-                    <div class="col-md-6">
-                      <div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc">
-                        <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
-                        <span>Chargement des dates...</span> <b class="caret"></b>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="x_content">
-                    <div class="demo-container" style="height:250px">
-                      <div id="chart_plot_03" class="demo-placeholder">
-                        <div class="text-center" style="padding-top: 100px;">
-                          <i class="fa fa-spinner fa-spin fa-2x"></i><br>
-                          <span style="margin-top: 10px; display: inline-block;">Chargement du graphique...</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-4 col-sm-6 ">
-                <div class="x_panel fixed_height_320">
-                  <div class="x_title">
-                    <h2>Répartition Services <small>Personnel par service</small></h2>
-                    <ul class="nav navbar-right panel_toolbox">
-                      <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                      </li>
-                      <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            <a class="dropdown-item" href="#">Settings 1</a>
-                            <a class="dropdown-item" href="#">Settings 2</a>
-                          </div>
-                      </li>
-                      <li><a class="close-link"><i class="fa fa-close"></i></a>
-                      </li>
-                    </ul>
-                    <div class="clearfix"></div>
-                  </div>
-                  <div class="x_content">
-                    <h4>Postes & Effectifs</h4>
-                    <div id="postes-container">
-                      <div class="text-center"><i class="fa fa-spinner fa-spin"></i> Chargement des données...</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
-              <div class="col-md-4 col-sm-6 ">
-                <div class="x_panel tile fixed_height_320">
-                  <div class="x_title">
-                    <h2>Présences Aujourd'hui <small>Personnel présent</small></h2>
-                    <ul class="nav navbar-right panel_toolbox">
-                      <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                      </li>
-                      <li class="dropdown">
+<div class="row">
+    <div class="col-md-4 col-sm-6">
+        <div class="x_panel fixed_height_320">
+            <div class="x_title">
+                <h2>Répartition Services <small>Personnel par service</small></h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                    <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                             <a class="dropdown-item" href="#">Settings 1</a>
                             <a class="dropdown-item" href="#">Settings 2</a>
-                          </div>
-                      </li>
-                      <li><a class="close-link"><i class="fa fa-close"></i></a>
-                      </li>
-                    </ul>
-                    <div class="clearfix"></div>
-                  </div>
-                  <div class="x_content">
-                  <table class="" style="width:100%">
+                        </div>
+                    </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <h4>Postes & Effectifs</h4>
+                <div id="postes-container">
+                    <div class="text-center"><i class="fa fa-spinner fa-spin"></i> Chargement des données...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 col-sm-6">
+        <div class="x_panel tile fixed_height_320">
+            <div class="x_title">
+                <h2>Statut Aujourd'hui <small>Présences, Absences, Retards</small></h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item" href="#">Settings 1</a>
+                            <a class="dropdown-item" href="#">Settings 2</a>
+                        </div>
+                    </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <table class="" style="width:100%">
                     <tr>
-                      <th style="width:37%;">
-                        <p>Services</p>
-                      </th>
-                      <th>
-                        <div class="col-lg-7 col-md-7 col-sm-7 ">
-                          <p class="">Service</p>
-                        </div>
-                        <div class="col-lg-5 col-md-5 col-sm-5 ">
-                          <p class="">Répartition</p>
-                        </div>
-                      </th>
+                        <th style="width:37%;">
+                            <p>Statut</p>
+                        </th>
+                        <th>
+                            <div class="col-lg-7 col-md-7 col-sm-7">
+                                <p class="">Statut</p>
+                            </div>
+                            <div class="col-lg-5 col-md-5 col-sm-5">
+                                <p class="">Pourcentage</p>
+                            </div>
+                        </th>
                     </tr>
                     <tr>
                         <td>
                             <canvas class="canvasDoughnut" height="140" width="140" style="margin: 15px 10px 10px 0"></canvas>
-                          </td>
-                      <td>
-                        <table class="tile_info">
-                          <tr><td colspan="2" class="text-center"><i class="fa fa-spinner fa-spin"></i> Chargement...</td></tr>
-                        </table>
-                      </td>
+                        </td>
+                        <td>
+                            <table class="tile_info">
+                                <tr><td colspan="2" class="text-center"><i class="fa fa-spinner fa-spin"></i> Chargement...</td></tr>
+                            </table>
+                        </td>
                     </tr>
-                  </table>
-                  </div>
-                </div>
-              </div>
+                </table>
+            </div>
+        </div>
+    </div>
 
-              <div class="col-md-4 col-sm-6 ">
-                <div class="x_panel fixed_height_320">
-                  <div class="x_title">
-                    <h2>Statistiques RH <small>Indicateurs</small></h2>
-                    <ul class="nav navbar-right panel_toolbox">
-                      <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                      </li>
-                      <li class="dropdown">
+    <div class="col-md-4 col-sm-6">
+        <div class="x_panel fixed_height_320">
+            <div class="x_title">
+                <h2>Statistiques RH <small>Indicateurs</small></h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                    <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                             <a class="dropdown-item" href="#">Settings 1</a>
                             <a class="dropdown-item" href="#">Settings 2</a>
-                          </div>
-                      </li>
-                      <li><a class="close-link"><i class="fa fa-close"></i></a>
-                      </li>
-                    </ul>
-                    <div class="clearfix"></div>
-                  </div>
-                  <div class="x_content">
-                    <div class="dashboard-widget-content">
-                      <ul class="quick-list">
+                        </div>
+                    </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="dashboard-widget-content">
+                    <ul class="quick-list">
                         <li><i class="fa fa-users"></i><a href="#">Personnel</a></li>
                         <li><i class="fa fa-clock-o"></i><a href="#">Pointages</a></li>
                         <li><i class="fa fa-credit-card"></i><a href="#">Badges</a></li>
                         <li><i class="fa fa-building"></i><a href="#">Services</a></li>
                         <li><i class="fa fa-briefcase"></i><a href="#">Postes</a></li>
-                      </ul>
-                      <div class="sidebar-widget">
+                    </ul>
+                    <div class="sidebar-widget">
                         <h4>Taux de Présence</h4>
                         <canvas width="150" height="80" id="chart_gauge_01" class="" style="width: 160px; height: 100px;"></canvas>
                         <div class="goal-wrapper">
-                          <span id="gauge-text" class="gauge-value gauge-chart pull-left"><i class="fa fa-spinner fa-spin"></i></span>
-                          <span class="gauge-value pull-left">%</span>
-                          <span id="goal-text" class="goal-value pull-right">100%</span>
+                            <span id="gauge-text" class="gauge-value gauge-chart pull-left"><i class="fa fa-spinner fa-spin"></i></span>
+                            <span class="gauge-value pull-left">%</span>
+                            <span id="goal-text" class="goal-value pull-right">100%</span>
                         </div>
-                      </div>
                     </div>
-                  </div>
                 </div>
-              </div>
-
-
-              <!-- start of weather widget -->
-
-              <!-- end of weather widget -->
             </div>
-          </div>
-          
+        </div>
+    </div>
+</div>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
 <script>
 $(document).ready(function() {
-    
     // Fonction pour dessiner le graphique donut avec Chart.js
     function drawDonutChartJS(data) {
         var canvas = document.querySelector('.canvasDoughnut');
         if (!canvas || data.length === 0) return;
         
-        // Vérifier si Chart.js est disponible
         if (typeof Chart === 'undefined') {
             console.error('Chart.js n\'est pas chargé');
             return;
         }
         
-        // Détruire le graphique existant s'il y en a un
         if (window.servicesChart) {
             window.servicesChart.destroy();
         }
         
         var ctx = canvas.getContext('2d');
         
-        // Préparer les données pour Chart.js
         var labels = data.map(item => item.label);
         var values = data.map(item => item.data);
         var colors = data.map(item => item.color);
@@ -285,9 +302,7 @@ $(document).ready(function() {
                 options: {
                     responsive: false,
                     maintainAspectRatio: false,
-                    legend: {
-                        display: false // On utilise le tableau à côté
-                    },
+                    legend: { display: false },
                     tooltips: {
                         callbacks: {
                             label: function(tooltipItem, data) {
@@ -303,12 +318,11 @@ $(document).ready(function() {
             });
         } catch (error) {
             console.error('Erreur lors de la création du graphique donut:', error);
-            // Fallback : dessiner un graphique simple avec canvas
             drawSimpleDonut(data, canvas);
         }
     }
     
-    // Fonction de fallback pour dessiner un donut simple
+    // Fonction de secours pour dessiner un donut simple
     function drawSimpleDonut(data, canvas) {
         var ctx = canvas.getContext('2d');
         var centerX = canvas.width / 2;
@@ -316,18 +330,15 @@ $(document).ready(function() {
         var radius = Math.min(centerX, centerY) - 20;
         var innerRadius = radius * 0.5;
         
-        // Calculer le total
         var total = data.reduce((sum, item) => sum + item.data, 0);
         
-        // Effacer le canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        var currentAngle = -Math.PI / 2; // Commencer en haut
+        var currentAngle = -Math.PI / 2;
         
         data.forEach(function(item) {
             var sliceAngle = (item.data / total) * 2 * Math.PI;
             
-            // Dessiner la section
             ctx.beginPath();
             ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
             ctx.arc(centerX, centerY, innerRadius, currentAngle + sliceAngle, currentAngle, true);
@@ -336,7 +347,6 @@ $(document).ready(function() {
             ctx.fillStyle = item.color;
             ctx.fill();
             
-            // Bordure
             ctx.strokeStyle = '#fff';
             ctx.lineWidth = 2;
             ctx.stroke();
@@ -344,7 +354,6 @@ $(document).ready(function() {
             currentAngle += sliceAngle;
         });
         
-        // Texte au centre
         ctx.fillStyle = '#333';
         ctx.font = 'bold 12px Arial';
         ctx.textAlign = 'center';
@@ -353,7 +362,7 @@ $(document).ready(function() {
         ctx.fillText('Total', centerX, centerY + 10);
     }
     
-    // Configuration daterangepicker avec années étendues
+    // Configuration du sélecteur de dates
     $('#reportrange').daterangepicker({
         startDate: moment().subtract(29, 'days'),
         endDate: moment(),
@@ -374,9 +383,9 @@ $(document).ready(function() {
     // Initialiser l'affichage des dates
     $('#reportrange span').html(moment().subtract(29, 'days').format('DD/MM/YYYY') + ' - ' + moment().format('DD/MM/YYYY'));
     
-    // Fonction principale de chargement du dashboard
+    // Fonction principale de chargement du tableau de bord
     function loadDashboard(startDate, endDate) {
-        console.log("Chargement du dashboard pour la période : " + startDate + " à " + endDate);
+        console.log("Chargement du tableau de bord pour la période : " + startDate + " à " + endDate);
         
         $.ajax({
             url: 'get_dashboard_stats.php',
@@ -395,24 +404,23 @@ $(document).ready(function() {
                 // 2. Charger les statistiques des postes
                 loadPostesStats(response.postes_stats);
                 
-                // 3. Charger les statistiques des services
-                loadServicesChart(response.services_stats);
+                // 3. Charger les statistiques de statut (Présents, Absents, Retards)
+                loadStatusChart(response.summary);
                 
                 // 4. Charger la jauge de présence
                 var tauxPresence = response.summary ? (response.summary.taux_presence || 0) : 0;
-                console.log("Taux de présence reçu:", tauxPresence + "%");
                 loadPresenceGauge(tauxPresence);
                 
                 // 5. Mettre à jour les statistiques générales
                 updateSummaryStats(response.summary);
             },
             error: function(xhr, status, error) {
-                console.log('Erreur lors du chargement des données du dashboard:', error);
-                // Afficher un message d'erreur à l'utilisateur
+                console.log('Erreur lors du chargement des données du tableau de bord:', error);
                 $('#total-personnel').text('Erreur');
                 $('#presences-today').text('Erreur');
-                $('#duree-moyenne').text('Erreur');
-                $('#badges-actifs').text('Erreur');
+                $('#retards-total').text('Erreur');
+                $('#absents-total').text('Erreur');
+                $('#disponibles-total').text('Erreur');
                 $('#gauge-text').text('N/A');
             }
         });
@@ -421,7 +429,6 @@ $(document).ready(function() {
     // 1. Fonction graphique principal
     function loadChart(data) {
         if ($("#chart_plot_03").length) {
-            // Effacer le message de chargement
             $("#chart_plot_03").empty();
             
             if (data.length > 0) {
@@ -464,11 +471,10 @@ $(document).ready(function() {
         }
     }
     
-    // 2. Fonction statistiques des postes - CRÉATION DYNAMIQUE
+    // 2. Fonction statistiques des postes
     function loadPostesStats(postesData) {
         var $container = $('#postes-container');
         
-        // Vider le conteneur
         $container.empty();
         
         if (postesData && postesData.length > 0) {
@@ -477,7 +483,6 @@ $(document).ready(function() {
             postesData.forEach(function(poste, index) {
                 var percentage = total > 0 ? (parseInt(poste.nb_employes) / total) * 100 : 0;
                 
-                // Créer dynamiquement chaque widget
                 var widgetHtml = `
                     <div class="widget_summary">
                         <div class="w_left w_25">
@@ -500,59 +505,46 @@ $(document).ready(function() {
                 $container.append(widgetHtml);
             });
         } else {
-            // Afficher un message si pas de données
             $container.html('<p class="text-muted">Aucune donnée de poste disponible</p>');
         }
     }
     
-    // 3. Fonction graphique circulaire des services - CRÉATION DYNAMIQUE
-    function loadServicesChart(servicesData) {
+    // 3. Fonction graphique circulaire des statuts
+    function loadStatusChart(summary) {
         var $tableInfo = $('.tile_info');
-        var colors = ['blue', 'green', 'purple', 'aero', 'red'];
-        var colorCodes = ['#3498db', '#26B99A', '#9b59b6', '#1ABC9C', '#e74c3c']; // Codes couleurs pour le donut
+        var colors = ['green', 'red', 'orange'];
+        var colorCodes = ['#2ecc71', '#e91e63', '#ff9800']; // Correspond aux couleurs des tuiles
         
-        // Vider le tableau
         $tableInfo.empty();
         
-        if (servicesData && servicesData.length > 0) {
-            var total = servicesData.reduce((sum, s) => sum + parseInt(s.nb_employes), 0);
-            
-            // Préparer les données pour le graphique donut
-            var donutData = [];
-            
-            servicesData.forEach(function(service, index) {
-                if (index < colors.length) {
-                    var percentage = total > 0 ? Math.round((parseInt(service.nb_employes) / total) * 100) : 0;
-                    
-                    // Données pour le donut
-                    donutData.push({
-                        label: service.service,
-                        data: parseInt(service.nb_employes),
-                        color: colorCodes[index]
-                    });
-                    
-                    // Créer dynamiquement chaque ligne du tableau
-                    var rowHtml = `
-                        <tr>
-                            <td>
-                                <p><i class="fa fa-square ${colors[index]}"></i>${service.service}</p>
-                            </td>
-                            <td>${percentage}%</td>
-                        </tr>
-                    `;
-                    
-                    $tableInfo.append(rowHtml);
-                }
+        var donutData = [
+            { label: 'Présents', data: parseInt(summary.personnes_presentes_aujourd_hui) || 0, color: colorCodes[0] },
+            { label: 'Absents', data: parseInt(summary.absents_total) || 0, color: colorCodes[1] },
+            { label: 'En Retard', data: parseInt(summary.retards_total) || 0, color: colorCodes[2] }
+        ];
+        
+        var total = donutData.reduce((sum, item) => sum + item.data, 0);
+        
+        if (total > 0) {
+            donutData.forEach(function(item, index) {
+                var percentage = total > 0 ? Math.round((item.data / total) * 100) : 0;
+                
+                var rowHtml = `
+                    <tr>
+                        <td>
+                            <p><i class="fa fa-square ${colors[index]}"></i>${item.label}</p>
+                        </td>
+                        <td>${percentage}%</td>
+                    </tr>
+                `;
+                
+                $tableInfo.append(rowHtml);
             });
             
-            // Dessiner le graphique donut avec Chart.js (plus moderne)
             drawDonutChartJS(donutData);
-            
         } else {
-            // Afficher un message si pas de données
-            $tableInfo.html('<tr><td colspan="2" class="text-muted">Aucune donnée de service disponible</td></tr>');
+            $tableInfo.html('<tr><td colspan="2" class="text-muted">Aucune donnée de statut disponible</td></tr>');
             
-            // Vider le canvas ou détruire le graphique existant
             if (window.servicesChart) {
                 window.servicesChart.destroy();
                 window.servicesChart = null;
@@ -560,22 +552,18 @@ $(document).ready(function() {
         }
     }
     
-    // 4. Fonction jauge de présence - Design original du template
+    // 4. Fonction jauge de présence
     function loadPresenceGauge(percentage) {
         console.log("Chargement de la jauge avec:", percentage + "%");
         
-        // S'assurer que percentage est un nombre valide entre 0 et 100
         var validPercentage = parseFloat(percentage) || 0;
         validPercentage = Math.max(0, Math.min(100, validPercentage));
         
-        // Mettre à jour le texte affiché (1 décimale)
         $('#gauge-text').text(validPercentage.toFixed(1));
-        
-        // Dessiner la jauge avec le design original du template
         drawGaugeTemplate(validPercentage);
     }
     
-    // Fonction pour dessiner la jauge avec le design original du template
+    // Fonction pour dessiner la jauge
     function drawGaugeTemplate(percentage) {
         var canvas = document.getElementById('chart_gauge_01');
         if (!canvas) {
@@ -583,70 +571,59 @@ $(document).ready(function() {
             return;
         }
         
-        // Vérifier si Gauge.js est disponible (la vraie bibliothèque du template)
         if (typeof Gauge !== 'undefined') {
-            console.log("Utilisation de Gauge.js (bibliothèque originale du template)");
+            console.log("Utilisation de Gauge.js");
             
-            // Détruire la jauge existante
             if (window.gaugeInstance) {
                 window.gaugeInstance = null;
             }
             
-            // Configuration identique au template original
             var opts = {
-                lines: 12,              // Nombre de lignes (graduations)
-                angle: 0,               // Angle des lignes
-                lineWidth: 0.4,         // Épaisseur des lignes
+                lines: 12,
+                angle: 0,
+                lineWidth: 0.4,
                 pointer: {
-                    length: 0.75,       // Longueur de l'aiguille
-                    strokeWidth: 0.042, // Épaisseur de l'aiguille
-                    color: '#1D212A'    // Couleur noire de l'aiguille
+                    length: 0.75,
+                    strokeWidth: 0.042,
+                    color: '#1D212A'
                 },
                 limitMax: false,
-                colorStart: '#1ABC9C',  // Couleur verte du template
-                colorStop: '#1ABC9C',   // Couleur verte du template
-                strokeColor: '#F0F3F3', // Couleur de fond gris clair
+                colorStart: '#1ABC9C',
+                colorStop: '#1ABC9C',
+                strokeColor: '#F0F3F3',
                 generateGradient: true
             };
             
             try {
-                // Créer la jauge comme dans le template original
                 window.gaugeInstance = new Gauge(canvas).setOptions(opts);
-                window.gaugeInstance.maxValue = 100;  // Maximum 100% (pas 6000 comme le template)
-                window.gaugeInstance.minValue = 0;    // Minimum 0%
+                window.gaugeInstance.maxValue = 100;
+                window.gaugeInstance.minValue = 0;
                 window.gaugeInstance.animationSpeed = 32;
-                
-                // Utiliser setTextField pour la mise à jour automatique du texte comme le template
                 window.gaugeInstance.setTextField(document.getElementById("gauge-text"));
-                
-                // Définir la valeur (cela mettra à jour automatiquement le texte)
                 window.gaugeInstance.set(percentage);
                 
                 console.log("Jauge créée avec succès, valeur:", percentage + "%");
             } catch (error) {
                 console.error('Erreur lors de la création de la jauge Gauge.js:', error);
-                // Fallback vers canvas natif
                 drawSimpleGaugeTemplate(percentage, canvas);
             }
         } else {
-            console.warn('Gauge.js non disponible, utilisation du fallback canvas');
+            console.warn('Gauge.js non disponible, utilisation du secours canvas');
             drawSimpleGaugeTemplate(percentage, canvas);
         }
     }
     
-    // Fonction de fallback qui reproduit le design du template
+    // Fonction de secours pour la jauge
     function drawSimpleGaugeTemplate(percentage, canvas) {
-        console.log("Utilisation du fallback canvas pour:", percentage + "%");
+        console.log("Utilisation du secours canvas pour:", percentage + "%");
         
         var ctx = canvas.getContext('2d');
         var centerX = canvas.width / 2;
         var centerY = canvas.height - 10;
         var radius = Math.min(centerX, centerY) - 15;
         
-        // Effacer le canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Dessiner l'arc de fond (gris clair)
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius, Math.PI, 2 * Math.PI, false);
         ctx.strokeStyle = '#F0F3F3';
@@ -654,7 +631,6 @@ $(document).ready(function() {
         ctx.lineCap = 'round';
         ctx.stroke();
         
-        // Dessiner l'arc de progression (vert) seulement si percentage > 0
         if (percentage > 0) {
             var progressAngle = Math.PI * (percentage / 100);
             ctx.beginPath();
@@ -665,7 +641,6 @@ $(document).ready(function() {
             ctx.stroke();
         }
         
-        // Dessiner les graduations (12 lignes comme dans le template)
         ctx.strokeStyle = '#1D212A';
         ctx.lineWidth = 1;
         for (var i = 0; i <= 12; i++) {
@@ -681,7 +656,6 @@ $(document).ready(function() {
             ctx.stroke();
         }
         
-        // Dessiner l'aiguille
         var needleAngle = Math.PI + (Math.PI * percentage / 100);
         var needleLength = radius * 0.75;
         var needleX = centerX + needleLength * Math.cos(needleAngle);
@@ -695,73 +669,70 @@ $(document).ready(function() {
         ctx.lineCap = 'round';
         ctx.stroke();
         
-        // Point central
         ctx.beginPath();
         ctx.arc(centerX, centerY, 4, 0, 2 * Math.PI);
         ctx.fillStyle = '#1D212A';
         ctx.fill();
         
-        // Mettre à jour manuellement le texte pour le fallback
         $('#gauge-text').text(percentage.toFixed(1));
         
-        console.log("Jauge fallback dessinée avec succès:", percentage + "%");
+        console.log("Jauge secours dessinée avec succès:", percentage + "%");
     }
     
-    // 6. Fonction statistiques générales
+    // 5. Fonction statistiques générales
     function updateSummaryStats(summary) {
         $('#total-personnel').text(summary.total_personnel || 0);
         $('#presences-today').text(summary.personnes_presentes_aujourd_hui || 0);
-        $('#duree-moyenne').text(summary.duree_moyenne_heures ? Math.round(summary.duree_moyenne_heures * 10) / 10 + 'h' : '0h');
-        
-        // Mettre à jour les badges actifs
-        $.ajax({
-            url: 'get_dashboard_stats.php',
-            type: 'GET',
-            dataType: 'json',
-            success: function(response) {
-                if (response.badge_stats) {
-                    $('#badges-actifs').text(response.badge_stats.badges_actifs || 0);
-                }
-            }
-        });
+        $('#retards-total').text(summary.retards_total || 0);
+        $('#absents-total').text(summary.absents_total || 0);
+        $('#disponibles-total').text(summary.disponibles_total || 0);
     }
     
     // Chargement initial
     var defaultStart = moment().subtract(29, 'days').format('YYYY-MM-DD');
     var defaultEnd = moment().format('YYYY-MM-DD');
     
-    // Vérifications initiales et test de la jauge
-    console.log("=== INITIALISATION DASHBOARD ===");
+    console.log("=== INITIALISATION TABLEAU DE BORD ===");
     console.log("Gauge.js disponible:", typeof Gauge !== 'undefined');
-    console.log("Canvas gauge disponible:", !!document.getElementById('chart_gauge_01'));
+    console.log("Canvas jauge disponible:", !!document.getElementById('chart_gauge_01'));
     
-    // Test initial de la jauge avec une valeur par défaut
     setTimeout(function() {
         console.log("Test initial de la jauge...");
-        loadPresenceGauge(75); // Valeur de test pour vérifier le fonctionnement
+        loadPresenceGauge(75);
     }, 500);
+    
+    // Chargement initial avec données PHP
+    var initialSummary = {
+        total_personnel: <?php echo json_encode($disponibles_total); ?>,
+        personnes_presentes_aujourd_hui: <?php echo json_encode($presences_total); ?>,
+        retards_total: <?php echo json_encode($retards_total); ?>,
+        absents_total: <?php echo json_encode($absents_total); ?>,
+        disponibles_total: <?php echo json_encode($disponibles_total); ?>,
+        taux_presence: <?php echo json_encode($taux_presence); ?>
+    };
+    updateSummaryStats(initialSummary);
+    loadStatusChart(initialSummary);
     
     loadDashboard(defaultStart, defaultEnd);
     
-    // Écouter les changements du sélecteur de dates
     $('#reportrange').on('apply.daterangepicker', function(ev, picker) {
         var startDate = picker.startDate.format('YYYY-MM-DD');
         var endDate = picker.endDate.format('YYYY-MM-DD');
         loadDashboard(startDate, endDate);
     });
     
-    // Actualisation automatique toutes les 5 minutes
     setInterval(function() {
         var currentStart = $('#reportrange').data('daterangepicker').startDate.format('YYYY-MM-DD');
         var currentEnd = $('#reportrange').data('daterangepicker').endDate.format('YYYY-MM-DD');
         loadDashboard(currentStart, currentEnd);
-    }, 300000); // 5 minutes
+    }, 300000);
 });
 </script>
-          
-          <!-- Include les scripts nécessaires pour les graphiques -->
-          <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
-          <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/plugins/doughnutlabel.min.js"></script>
-          <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-          <script src="https://cdnjs.cloudflare.com/ajax/libs/daterangepicker/3.1.0/daterangepicker.min.js"></script>
-          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/daterangepicker/3.1.0/daterangepicker.css" />
+
+<!-- Inclusion des scripts nécessaires pour les graphiques -->
+ 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/plugins/doughnutlabel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/daterangepicker/3.1.0/daterangepicker.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/daterangepicker/3.1.0/daterangepicker.css" />

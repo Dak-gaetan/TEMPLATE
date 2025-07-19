@@ -12,7 +12,7 @@ require_once('../config/securite.php');
     <meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="icon" href="images/favicon.ico" type="image/ico" />
 
-    <title>Gentelella Alela!</title>
+    <title>E-Sotral Pointage</title>
 
     <!-- Bootstrap -->
     <link href="../vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -89,9 +89,10 @@ require_once('../config/securite.php');
     <!-- bootstrap-daterangepicker -->
     <script src="../vendors/moment/min/moment.min.js"></script>
     <script src="../vendors/bootstrap-daterangepicker/daterangepicker.js"></script>
+    <script src="../build/js/custom.min.js"></script>
 
     <!-- Custom Theme Scripts -->
-    <script src="../build/js/custom.min.js"></script>
+   
 	
   </body>
 </html>
