@@ -19,7 +19,7 @@ $pseudo = isset($_SESSION['pseudo']) ? $_SESSION['pseudo'] : '';
             <!-- menu profile quick info -->
             <div class="profile clearfix">
               <div class="profile_pic">
-                <img src="/TEMPLATE/production/images/img.jpg" alt="..." class="img-circle profile_img">
+                <img src="/TEMPLATE/production/images/user.png" alt="..." class="img-circle profile_img">
               </div>
               <div class="profile_info">
                 <span>Bienvenue</span>
